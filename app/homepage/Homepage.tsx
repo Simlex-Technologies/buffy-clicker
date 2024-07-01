@@ -4,12 +4,17 @@ import images from "@/public/images";
 import { motion } from "framer-motion"
 import CustomImage from "../components/ui/image";
 import { Icons } from "../components/ui/icons";
+import { useSearchParams } from "next/navigation";
 
 interface HomepageProps {
 
 }
 
 const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
+
+    const params = useSearchParams();
+    const userId = params.get('id');
+    const userName = params.get('userName');
 
     const [taps, setTaps] = useState(0);
 

@@ -20,7 +20,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
             // Set a timeout to hide the loader after 5 seconds
             const timeout = setTimeout(() => {
                 setLoaderIsVisible(false);
-            }, 2000);
+            }, 4000);
 
             // Cleanup function to clear the timeout if the component unmounts or dependencies change
             return () => clearTimeout(timeout);
