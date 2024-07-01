@@ -20,7 +20,7 @@ export default async function RootLayout({
         <html lang="en" data-theme={"light"}>
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
-            <body className={`${mulish.className} p-6 bg-gradient-to-b from-slate-800 to-slate-0`}>
+            <body className={`${mulish.className} p-6 bg-gradient-to-b from-slate-800 to-black to-slate-0`}>
                 <Layout children={children} />
             </body>
         </html>
