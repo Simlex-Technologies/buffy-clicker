@@ -61,7 +61,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
             <motion.div
                 variants={splashScreenVariant}
-                className='w-[100vw] h-[100vh] fixed top-0 left-0 z-30 min-h-[100vh] grid place-items-center bg-white'>
+                className='w-[100vw] h-[100vh] fixed top-0 left-0 z-30 min-h-[100vh] grid place-items-center bg-white pointer-events-none'>
                 <div className='w-60 h-60 animate-pulse transition-all duration-150 ease-in-out object-contain relative'>
                     <CustomImage src={images.splash} alt='logo' />
                 </div>
