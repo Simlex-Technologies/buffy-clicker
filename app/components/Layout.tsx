@@ -1,11 +1,16 @@
 "use client"
-import { FunctionComponent, ReactElement, ReactNode, useState, useEffect } from "react";
+import { FunctionComponent, ReactElement, ReactNode, useState, useEffect, useContext, useMemo } from "react";
 import CustomImage from "./ui/image";
 import images from "@/public/images";
 import { motion } from "framer-motion";
 import Topbar from "./Topbar";
 import BottomBar from "./BottomBar";
 import NextTopLoader from "nextjs-toploader";
+import { ApplicationContext, ApplicationContextData } from "../context/ApplicationContext";
+import { useSearchParams } from "next/navigation";
+import { UserProfileInformation } from "../models/IUser";
+import { StorageKeys } from "../constants/storageKeys";
+import { splashScreenVariant } from "../animations/splashScreen";
 
 interface LayoutProps {
     children?: ReactNode;
@@ -13,39 +18,51 @@ interface LayoutProps {
 
 const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
+    const { userProfileInformation, fetchUserProfileInformation } = useContext(ApplicationContext) as ApplicationContextData;
     const [loaderIsVisible, setLoaderIsVisible] = useState(true);
+
     const iswindow = typeof window !== 'undefined' ? true : false;
 
+    const params = useSearchParams();
+    const userId = params.get('id');
+    const userName = params.get('userName');
+
+
     useEffect(() => {
-        if (typeof window !== 'undefined') {
+        
+        if (typeof window !== 'undefined' && userProfileInformation) {
             // Set a timeout to hide the loader after 5 seconds
             const timeout = setTimeout(() => {
                 setLoaderIsVisible(false);
-            }, 4000);
+            }, 3000);
 
             // Cleanup function to clear the timeout if the component unmounts or dependencies change
             return () => clearTimeout(timeout);
         }
-    }, [iswindow]);
+    }, [iswindow, userProfileInformation]);
 
-    const splashScreenVariant = {
-        opened: {
-            opacity: 1,
-            height: "100vh",
-            transition: {
-                duration: 0.25,
-                ease: "easeOut",
-            },
-        },
-        closed: {
-            opacity: 0,
-            height: "auto",
-            transition: {
-                duration: 0.25,
-                ease: "easeInOut",
-            },
-        },
-    }
+    useMemo(() => {
+        if (userId && userName) {
+
+            // construct user information
+            const userInfo: UserProfileInformation = {
+                id: userId,
+                userId: Number(userId),
+                username: userName
+            }
+
+            // save to session storage
+            sessionStorage.setItem(StorageKeys.UserInformation, JSON.stringify(userInfo));
+
+            fetchUserProfileInformation();
+        }
+
+        const userProfileInformation = sessionStorage.getItem(StorageKeys.UserInformation);
+        
+        if (userProfileInformation) {
+            fetchUserProfileInformation();
+        }
+    }, [userId, userName]);
 
     return (
         <motion.div
@@ -63,6 +80,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
                 speed={200}
                 shadow="0 0 10px #f1fa9e,0 0 5px #ceb0fa"
             />
+
             {!loaderIsVisible && (
                 <>
                     <Topbar />

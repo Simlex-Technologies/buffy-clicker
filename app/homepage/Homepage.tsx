@@ -35,7 +35,7 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                 </div>
             </div>
 
-            <div className="flex relative">
+            <div className="flex relative mb-12">
                 <motion.span
                     onClick={() => setTaps(taps + 1)}
                     whileTap={{
@@ -46,6 +46,11 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                     className="w-60 h-60 relative">
                     <CustomImage src={images.clicker} alt="Durov" />
                 </motion.span>
+            </div>
+
+            <div className="flex flex-row items-center text-white">
+                <p className="text-slate-400">Referral points:</p>&nbsp;
+                <span className="text-xl">0</span>
             </div>
         </main>
     );
