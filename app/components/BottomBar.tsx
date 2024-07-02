@@ -4,6 +4,7 @@ import { FunctionComponent, ReactElement } from "react";
 import CustomImage from "./ui/image";
 import images from "@/public/images";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 
 interface BottomBarProps {
 
@@ -16,12 +17,12 @@ const BottomBar: FunctionComponent<BottomBarProps> = (): ReactElement => {
         {
             title: "Refer",
             icon: images.buffies,
-            href: "/referral"
+            href: "/refer"
         },
         {
             title: "Task",
             icon: images.task,
-            href: "/referral"
+            href: "/task"
         },
         {
             title: "Tap",
@@ -31,12 +32,12 @@ const BottomBar: FunctionComponent<BottomBarProps> = (): ReactElement => {
         {
             title: "Boost",
             icon: images.boost,
-            href: "/referral"
+            href: "/boost"
         },
         {
             title: "Stats",
             icon: images.stats,
-            href: "/referral"
+            href: "/stats"
         }
     ]
 
@@ -46,9 +47,18 @@ const BottomBar: FunctionComponent<BottomBarProps> = (): ReactElement => {
             {
                 links.map((link, index) => (
                     <Link key={index} href={link.href} className={`flex flex-col items-center rounded-xl p-2 w-full text-xs font-semibold hover:bg-slate-50/10 ${pathname == link.href ? "bg-white/20 border-[1px] border-orange-400 shadow-inner pointer-events-none" : ""}`}>
-                        <span className="w-9 h-9 relative block">
+                        <motion.span
+                            animate={{
+                                scale: pathname == link.href ? [1, 0.8, 1] : 1,
+                                transitionBehavior: "ease-in-out",
+                                transition: {
+                                    duration: 1.5,
+                                    repeat: Infinity
+                                }
+                            }}
+                            className="w-9 h-9 relative block">
                             <CustomImage src={link.icon} alt="Buffy" />
-                        </span>
+                        </motion.span>
                         {link.title}
                     </Link>
                 ))

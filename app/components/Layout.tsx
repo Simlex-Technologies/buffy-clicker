@@ -5,6 +5,7 @@ import images from "@/public/images";
 import { motion } from "framer-motion";
 import Topbar from "./Topbar";
 import BottomBar from "./BottomBar";
+import NextTopLoader from "nextjs-toploader";
 
 interface LayoutProps {
     children?: ReactNode;
@@ -32,18 +33,18 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
             opacity: 1,
             height: "100vh",
             transition: {
-              duration: 0.25,
-              ease: "easeOut",
+                duration: 0.25,
+                ease: "easeOut",
             },
-          },
-          closed: {
+        },
+        closed: {
             opacity: 0,
             height: "auto",
             transition: {
-              duration: 0.25,
-              ease: "easeInOut",
+                duration: 0.25,
+                ease: "easeInOut",
             },
-          },
+        },
     }
 
     return (
@@ -51,6 +52,17 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
             initial="opened"
             animate={loaderIsVisible ? "opened" : "closed"}
         >
+            <NextTopLoader
+                color="#ffffff"
+                initialPosition={0.08}
+                crawlSpeed={200}
+                height={3}
+                crawl={true}
+                showSpinner={false}
+                easing="ease"
+                speed={200}
+                shadow="0 0 10px #f1fa9e,0 0 5px #ceb0fa"
+            />
             {!loaderIsVisible && (
                 <>
                     <Topbar />
