@@ -42,7 +42,7 @@ const BottomBar: FunctionComponent<BottomBarProps> = (): ReactElement => {
     ]
 
     return (
-        <footer className="fixed bottom-4 bg-white/10 text-white rounded-2xl p-2 flex flow-row gap-1 w-[calc(100vw_-_48px)] justify-between z-20">
+        <footer className="fixed bottom-4 bg-white/10 text-white rounded-2xl p-2 flex flow-row gap-1 w-[calc(100vw_-_48px)] justify-between z-20 backdrop-blur-md">
             {/* <footer className="fixed bottom-0 left-0 bg-white/10 text-white rounded-t-2xl p-2 py-4 flex flow-row gap-1 w-full justify-between z-20"> */}
             {
                 links.map((link, index) => (
