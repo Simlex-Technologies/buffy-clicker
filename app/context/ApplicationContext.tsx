@@ -1,6 +1,8 @@
 import { FunctionComponent, ReactNode, createContext, useState } from "react";
 import { UserProfileInformation } from "../models/IUser";
 import { StorageKeys } from "../constants/storageKeys";
+import { fetchUsers } from "../api/services/usersService";
+import { fetchUserFromDb } from "../api/services/fetchUserFromDb";
 
 
 // Define the type for the context data
@@ -47,8 +49,13 @@ const AppProvider: FunctionComponent<AppProviderProps> = ({ children }) => {
         const _userInfo = JSON.parse(sessionStorage.getItem(StorageKeys.UserInformation) as string);
 
         if (_userInfo !== null || _userInfo !== undefined) {
+
+            const user = await fetchUserFromDb(_userInfo.userId);
+
+            // return user;
+
             // Set the user information
-            setUserProfileInformation(_userInfo);
+            setUserProfileInformation(user);
         };
     };
 

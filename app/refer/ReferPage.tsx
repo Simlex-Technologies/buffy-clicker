@@ -15,8 +15,12 @@ const ReferPage: FunctionComponent<ReferPageProps> = (): ReactElement => {
     const [isLinkCopied, setIsLinkCopied] = useState(false);
 
     const copyLink = (link: string) => {
-        navigator.clipboard.writeText(link);
-        setIsLinkCopied(true);
+        try {
+            navigator.clipboard.writeText(link);
+            setIsLinkCopied(true);
+        } catch (error) {
+            console.error("Copying to clipboard failed:", error);
+        }
     };
 
     useMemo(() => {
@@ -27,7 +31,7 @@ const ReferPage: FunctionComponent<ReferPageProps> = (): ReactElement => {
         }
     }, [isLinkCopied]);
 
-    const userLink = `https://t.me/simsbot/start?startapp=${userProfileInformation?.username}${userProfileInformation?.userId}`;
+    const userLink = `https://t.me/SimlexBot?start=${userProfileInformation?.username}${userProfileInformation?.userId}`;
 
     return (
         <main className="flex min-h-screen flex-col items-center py-20">
@@ -36,7 +40,7 @@ const ReferPage: FunctionComponent<ReferPageProps> = (): ReactElement => {
             <div className="flex flex-col items-center my-3 w-full mb-8">
                 <p className={`text-white text-center ${isLinkCopied ? "text-orange-400" : ""}`}>{userLink}</p>
                 <Button
-                    className="opacity-70"
+                    className={isLinkCopied ? "opacity-70" : "opacity-100 bg-orange-400 text-white w-32 mt-3"}
                     onClick={() => copyLink(userLink)}>
                     {isLinkCopied ? "Copied!" : "Copy Link"}
                 </Button>

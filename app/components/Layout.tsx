@@ -11,12 +11,15 @@ import { useSearchParams } from "next/navigation";
 import { UserProfileInformation } from "../models/IUser";
 import { StorageKeys } from "../constants/storageKeys";
 import { splashScreenVariant } from "../animations/splashScreen";
+import { useCreateUser, useFetchUserInformation } from "../api/apiClient";
 
 interface LayoutProps {
     children?: ReactNode;
 }
 
 const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
+
+    const createUser = useCreateUser();
 
     const { userProfileInformation, fetchUserProfileInformation } = useContext(ApplicationContext) as ApplicationContextData;
     const [loaderIsVisible, setLoaderIsVisible] = useState(true);
@@ -27,9 +30,17 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     const userId = params.get('id');
     const userName = params.get('userName');
 
+    async function handleCreateUser(userInfo: UserProfileInformation) {
+        await createUser(userInfo)
+            .then((response) => {
+                console.log(response);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    };
 
     useEffect(() => {
-        
         if (typeof window !== 'undefined' && userProfileInformation) {
             // Set a timeout to hide the loader after 5 seconds
             const timeout = setTimeout(() => {
@@ -49,16 +60,16 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
                 id: userId,
                 userId: Number(userId),
                 username: userName
-            }
+            };
+
+            handleCreateUser(userInfo);
 
             // save to session storage
             sessionStorage.setItem(StorageKeys.UserInformation, JSON.stringify(userInfo));
-
-            fetchUserProfileInformation();
         }
 
         const userProfileInformation = sessionStorage.getItem(StorageKeys.UserInformation);
-        
+
         if (userProfileInformation) {
             fetchUserProfileInformation();
         }
