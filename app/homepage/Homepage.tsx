@@ -4,7 +4,7 @@ import images from "@/public/images";
 import { motion } from "framer-motion"
 import CustomImage from "../components/ui/image";
 import { Icons } from "../components/ui/icons";
-import { useSearchParams } from "next/navigation";
+// import { useSearchParams } from "next/navigation";
 import { metrics } from "../constants/userMetrics";
 import { ApplicationContext, ApplicationContextData } from "../context/ApplicationContext";
 import { useUpdateUserPoints } from "../api/apiClient";
@@ -18,11 +18,11 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
 
     const updateUserPoints = useUpdateUserPoints();
 
-    const { userProfileInformation } = useContext(ApplicationContext) as ApplicationContextData;
+    const { userProfileInformation, fetchUserProfileInformation } = useContext(ApplicationContext) as ApplicationContextData;
 
-    const params = useSearchParams();
-    const userId = params.get('id');
-    const userName = params.get('userName');
+    // const params = useSearchParams();
+    // const userId = params.get('id');
+    // const userName = params.get('userName');
 
     const [taps, setTaps] = useState<number>(0);
 
@@ -36,7 +36,8 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
 
         await updateUserPoints(data)
             .then((response) => {
-                console.log(response);
+                // console.log(response);
+                fetchUserProfileInformation();
             })
             .catch((error) => {
                 console.error(error);
