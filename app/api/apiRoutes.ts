@@ -11,12 +11,12 @@ export class ApiRoutes {
   /**
    * The test base url for the application
    */
-  static BASE_URL_TEST: string = "https://buffy-clicker.netlify.app";
+  static BASE_URL_TEST: string = "https://buffy-service.onrender.com";
 
   /**
    * The live base url for the application
    */
-  static BASE_URL_LIVE: string = "https://buffy-clicker.netlify.app";
+  static BASE_URL_LIVE: string = "https://buffy-service.onrender.com";
 
   /**
    * The route to Users endpoint
