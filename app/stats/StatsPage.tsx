@@ -23,7 +23,6 @@ const StatsPage: FunctionComponent<StatsPageProps> = (): ReactElement => {
     async function handleFetchLeaderboard() {
         await fetchLeaderboard()
             .then((response) => {
-                console.log("🚀 ~ .then ~ response:", response)
                 setLeaderboard(response.data);
             })
             .catch((error) => {
