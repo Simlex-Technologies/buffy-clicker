@@ -5,7 +5,7 @@ import { PointsUpdateRequest } from "../models/IPoints";
 import { ReferralCreationRequest } from "../models/IReferral";
 
 export const API = axios.create({
-  baseURL: ApiRoutes.BASE_URL_LIVE,
+  baseURL: ApiRoutes.BASE_URL_DEV,
 });
 
 //#region user
@@ -51,7 +51,7 @@ export function useUpdateUserPoints() {
 
 export function useCreateReferral() {
   async function createReferral(data: ReferralCreationRequest) {
-    return API.post(ApiRoutes.Referral, data);
+    return API.post(ApiRoutes.Referrals, data);
   }
 
   return createReferral;

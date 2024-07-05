@@ -1,4 +1,11 @@
 export interface ReferralCreationRequest {
-    userId: string;
-    referredId: string;
+  /**
+   * The referrer ID of the user who referred someone
+   */
+  referrerId: string;
+
+  /**
+   * The username of the user who was referred
+   */
+  username: string;
 }

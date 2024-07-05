@@ -34,8 +34,8 @@ model Users {
 
 model Referrals {
     id         String   @id @default(uuid())
-    userId     String
-    referredId String
+    userId     Int      @unique
+    referredId Int      @unique
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
 

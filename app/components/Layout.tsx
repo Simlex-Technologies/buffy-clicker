@@ -11,7 +11,8 @@ import { useSearchParams } from "next/navigation";
 import { UserProfileInformation } from "../models/IUser";
 import { StorageKeys } from "../constants/storageKeys";
 import { splashScreenVariant } from "../animations/splashScreen";
-import { useCreateUser, useFetchUserInformation } from "../api/apiClient";
+import { useCreateReferral, useCreateUser, useFetchUserInformation } from "../api/apiClient";
+import { ReferralCreationRequest } from "../models/IReferral";
 
 interface LayoutProps {
     children?: ReactNode;
@@ -20,15 +21,18 @@ interface LayoutProps {
 const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
     const createUser = useCreateUser();
+    const createReferral = useCreateReferral();
 
     const { userProfileInformation, fetchUserProfileInformation } = useContext(ApplicationContext) as ApplicationContextData;
     const [loaderIsVisible, setLoaderIsVisible] = useState(true);
+    const [isReferralCreated, setIsReferralCreated] = useState(false);
 
     const iswindow = typeof window !== 'undefined' ? true : false;
 
     const params = useSearchParams();
     const userId = params.get('id');
     const userName = params.get('userName');
+    const referralId = params.get('referralId');
 
     async function handleCreateUser(userInfo: UserProfileInformation) {
         await createUser(userInfo)
@@ -39,6 +43,23 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
                 console.error(error);
             });
     };
+
+    async function handleCreateReferral(username: string, referrerId: string) {
+
+        const data: ReferralCreationRequest = {
+            username,
+            referrerId
+        };
+
+        await createReferral(data)
+            .then((response) => {
+                console.log("Referral created", response);
+                setIsReferralCreated(true);
+            })
+            .catch((error) => {
+                console.error("Error creating referral", error);
+            });
+    }
 
     useEffect(() => {
         if (typeof window !== 'undefined' && userProfileInformation) {
@@ -66,14 +87,24 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
             // save to session storage
             sessionStorage.setItem(StorageKeys.UserInformation, JSON.stringify(userInfo));
+
+            console.log("Update session storage");
         }
 
         const userProfileInformation = sessionStorage.getItem(StorageKeys.UserInformation);
 
         if (userProfileInformation) {
+            console.log("🚀 ~ useMemo ~ userProfileInformation:", userProfileInformation)
             fetchUserProfileInformation();
         }
     }, [userId, userName]);
+
+    useMemo(() => {
+        if (referralId && userProfileInformation && !isReferralCreated) {
+            console.log("Calling referral creation")
+            handleCreateReferral(userProfileInformation.username, referralId);
+        }
+    }, [referralId, userProfileInformation]);
 
     return (
         <motion.div

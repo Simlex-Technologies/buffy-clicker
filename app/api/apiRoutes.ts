@@ -31,5 +31,5 @@ export class ApiRoutes {
   /**
    * The route to Referral endpoint
    */
-  static Referral: string = "api/referral";
+  static Referrals: string = "api/referrals";
 }

@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
   } catch {
     // Return an error if the operation fails
     return NextResponse.json(
-      { error: ApplicationError.FailedToCreateUser.Text },
+      { error: ApplicationError.FailedToCreateReferral.Text },
       { status: StatusCodes.InternalServerError }
     );
   }

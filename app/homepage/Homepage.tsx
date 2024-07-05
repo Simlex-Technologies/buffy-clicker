@@ -62,7 +62,7 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
         return () => {
             clearTimeout(timer);
         };
-    }, [taps, handleUpdateUserPoints]);
+    }, [taps]);
 
     return (
         <main className="flex min-h-screen flex-col items-center py-20">

@@ -190,4 +190,14 @@ export class ApplicationError extends BaseApplicationError {
   };
 
   //#endregion
+
+  //#region Referral Errors
+
+  /**
+   * The error message for ~ Failed to create referral
+   */
+    static FailedToCreateReferral: IApplicationError = {
+        Text: "Failed to create referral",
+        Code: "REFERRAL_1000",
+    };
 }

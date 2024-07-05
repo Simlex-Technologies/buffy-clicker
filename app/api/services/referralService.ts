@@ -1,4 +1,5 @@
 import { ApplicationError } from "@/app/constants/applicationError";
+import { ReferralCreationRequest } from "@/app/models/IReferral";
 import { StatusCodes } from "@/app/models/IStatusCodes";
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
@@ -8,7 +9,7 @@ export async function fetchReferrals(req: NextRequest) {
   const searchParams = new URLSearchParams(req.url.split("?")[1]);
 
   // Get the userId from the search params
-  const userId = searchParams.get("userId");
+  const userId = parseInt(searchParams.get("userId") as string);
 
   // if userid is not provided, return 400
   if (!userId) {
@@ -21,7 +22,7 @@ export async function fetchReferrals(req: NextRequest) {
   // If a userId is provided, find the user with that id
   const user = await prisma.users.findUnique({
     where: {
-      id: userId,
+      userId: userId,
     },
   });
 
@@ -46,32 +47,36 @@ export async function fetchReferrals(req: NextRequest) {
 }
 
 export async function createReferral(req: NextRequest) {
-  // Get the search params from the request url
-  const searchParams = new URLSearchParams(req.url.split("?")[1]);
+  // Get the body from the request
+  const request = (await req.json()) as ReferralCreationRequest;
 
-  // Get the userId from the search params
-  const userId = searchParams.get("userId");
-
-  // Get the referredId from the search params
-  const referredId = searchParams.get("ref");
-
-  // if userid is not provided, return 400
-  if (!userId || !referredId) {
+  // if referralId or username is not provided, return 400
+  if (!request.referrerId || !request.username) {
     return {
       error: ApplicationError.MissingRequiredParameters.Text,
       statusCode: StatusCodes.BadRequest,
     };
   }
 
-  // If a userId is provided, find the user with that id
+  const referrerId = request.referrerId; // The id of the user who referred the new user
+  const username = request.username; // The new user's username
+
+  // If a referrerId is provided, find the user with that id
   const user = await prisma.users.findUnique({
     where: {
-      id: userId,
+      referralCode: referrerId,
     },
   });
 
-  // If user is not found, return 404
-  if (!user) {
+  // If a username is provided, find the user with that username
+  const referredUser = await prisma.users.findUnique({
+    where: {
+      username: username,
+    },
+  });
+
+  // If user or referredUser is not found, return 404
+  if (!user || !referredUser) {
     return {
       error: ApplicationError.UserWithIdNotFound.Text,
       errorCode: ApplicationError.UserWithIdNotFound.Code,
@@ -83,13 +88,13 @@ export async function createReferral(req: NextRequest) {
   await prisma.$transaction([
     prisma.referrals.create({
       data: {
-        userId: userId,
-        referredId: referredId,
-      },
+        userId: user.userId,
+        referredId: referredUser.userId,
+      }, 
     }),
     prisma.users.update({
       where: {
-        id: userId,
+        userId: user.userId,
       },
       data: {
         points: {
