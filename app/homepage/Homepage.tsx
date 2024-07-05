@@ -53,7 +53,7 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
     const DEBOUNCE_DELAY = 1000; // Adjust the delay as needed
 
     useEffect(() => {
-        if(taps === 0) return;
+        if (taps === 0) return;
 
         const timer = setTimeout(() => {
             handleUpdateUserPoints();
@@ -94,10 +94,13 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                 </motion.span>
             </div>
 
-            <div className="flex flex-row items-center text-white">
-                <p className="text-slate-400">Referral points:</p>&nbsp;
-                <span className="text-xl">0</span>
-            </div>
+            {
+                userProfileInformation && userProfileInformation.referralCount &&
+                <div className="flex flex-row items-center text-white">
+                    <p className="text-slate-400">Referral points:</p>&nbsp;
+                    <span className="text-xl">{userProfileInformation.referralCount * 1000}</span>
+                </div>
+            }
         </main>
     );
 }

@@ -57,4 +57,12 @@ export function useCreateReferral() {
   return createReferral;
 }
 
+export function useFetchLeaderboard() {
+  async function fetchLeaderboard() {
+    return API.get(ApiRoutes.Leaderboard);
+  }
+
+  return fetchLeaderboard;
+}
+
 //#endregion

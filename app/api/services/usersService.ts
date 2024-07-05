@@ -188,3 +188,16 @@ export async function fetchUserByUsername(userName: string) {
   // If user is found, return it
   return { user };
 }
+
+export async function fetchLeaderboard(req: NextRequest) {
+  // Fetch all users
+  const users = await prisma.users.findMany({
+    orderBy: {
+        // order by points in descending order
+        points: "desc",
+    },
+  });
+
+  // Return all users
+  return { data: users };
+}
