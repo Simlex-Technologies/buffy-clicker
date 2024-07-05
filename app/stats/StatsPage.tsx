@@ -4,6 +4,7 @@ import CustomImage from "../components/ui/image";
 import images from "@/public/images";
 import { useFetchLeaderboard } from "../api/apiClient";
 import { metrics } from "../constants/userMetrics";
+import { useRouter } from "next/navigation";
 
 interface StatsPageProps {
 
@@ -17,6 +18,7 @@ interface LeaderboardData {
 const StatsPage: FunctionComponent<StatsPageProps> = (): ReactElement => {
 
     const fetchLeaderboard = useFetchLeaderboard();
+    const router = useRouter(); 
 
     const [leaderboard, setLeaderboard] = useState<LeaderboardData[]>();
 
@@ -32,7 +34,7 @@ const StatsPage: FunctionComponent<StatsPageProps> = (): ReactElement => {
 
     useEffect(() => {
         handleFetchLeaderboard();
-    }, [])
+    }, [router])
 
 
     return (
@@ -55,7 +57,7 @@ const StatsPage: FunctionComponent<StatsPageProps> = (): ReactElement => {
                                 leaderboard?.map((user, index) => (
                                     <tr key={index}>
                                         <td className="text-white p-2">{index + 1}</td> 
-                                        <td className="text-white p-2 flex items-baseline gap-2">@{user.username} <span className="text-xs text-yellow-400 font-medium">{metrics(Number(user.points))?.status}</span></td>
+                                        <td className="text-white p-2 flex items-baseline gap-2">@{user.username} <span className="text-xs text-yellow-400 bg-yellow-300/20 py-[2px] px-1 rounded-md font-medium">{metrics(Number(user.points))?.status}</span></td>
                                         <td className="text-white p-2 font-semibold">{user.points}</td>
                                     </tr>
                                 ))

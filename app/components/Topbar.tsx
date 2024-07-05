@@ -1,10 +1,7 @@
-import { FunctionComponent, ReactElement, useContext, useMemo } from "react";
+import { FunctionComponent, ReactElement, useContext } from "react";
 import CustomImage from "./ui/image";
-import images from "@/public/images";
 import Button from "./ui/button";
-import { usePathname, useSearchParams } from "next/navigation";
-import { StorageKeys } from "../constants/storageKeys";
-import { UserProfileInformation } from "../models/IUser";
+import { usePathname } from "next/navigation";
 import { ApplicationContext, ApplicationContextData } from "../context/ApplicationContext";
 import Link from "next/link";
 
