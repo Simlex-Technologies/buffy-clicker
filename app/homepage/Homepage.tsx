@@ -67,20 +67,21 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
         };
     }, [taps]);
 
-    // Use a hook to update the timesClickedPerSession back to the initial value after the user has stopped clicking. Increment the timesclickedpersession by 3 till the limit is reached
+    // Use a hook to update the timesClickedPerSession back to zero after the user has stopped clicking. Decrement the timesclickedpersession by 3 till the limit is reached
     useEffect(() => {
-        if (timesClickedPerSession >= sessionLimit) {
+        const limit = 1000 - timesClickedPerSession;
+        if (limit >= sessionLimit) {
             return;
         }
 
-        // const timer = setTimeout(() => {
-        //     // increment the timesClickedPerSession by 3
-        //     setTimesClickedPerSession((prev) => Math.min(prev + 3, sessionLimit));
-        // }, DEBOUNCE_DELAY);
+        const timer = setTimeout(() => {
+            // Decrement the timesClickedPerSession by 3
+            setTimesClickedPerSession(Math.min(timesClickedPerSession - 3, 1000));
+        }, DEBOUNCE_DELAY);
 
-        // return () => {
-        //     clearTimeout(timer);
-        // };
+        return () => {
+            clearTimeout(timer);
+        };
     }, [timesClickedPerSession]);
 
     return (

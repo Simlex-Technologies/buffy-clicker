@@ -22,7 +22,7 @@ const Topbar: FunctionComponent<TopbarProps> = (): ReactElement => {
                         <div className="flex flex-row items-center gap-3">
                             <span className="w-14 h-14 rounded-full overflow-hidden relative border-4 border-orange-400">
                                 {/* <CustomImage src={images.avatar} alt="User" /> */}
-                                {userProfileInformation.username && <CustomImage src={`https://placehold.co/300x300/8133F1/FFFFFF/png?text=${userProfileInformation.username[0].toUpperCase()}`} alt="User" />}
+                                {userProfileInformation.username && <CustomImage src={`https://placehold.co/300x300/8133F1/FFFFFF/png?text=${userProfileInformation.username[0].toUpperCase()}&font=Raleway`} alt="User" />}
                             </span>
                             <div>
                                 <h3 className="text-xl font-semibold text-white">{userProfileInformation.username}</h3>

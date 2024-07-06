@@ -18,14 +18,21 @@ interface LeaderboardData {
 const StatsPage: FunctionComponent<StatsPageProps> = (): ReactElement => {
 
     const fetchLeaderboard = useFetchLeaderboard();
-    const router = useRouter(); 
+    const router = useRouter();
 
     const [leaderboard, setLeaderboard] = useState<LeaderboardData[]>();
+    const [isFetchingStats, setIsFetchingStats] = useState(true);
 
-    async function handleFetchLeaderboard() {
+    async function handleFetchLeaderboard(showLoader: boolean = false) {
+        if (showLoader) {
+            setIsFetchingStats(true);
+            setLeaderboard(undefined);
+        };
+
         await fetchLeaderboard()
             .then((response) => {
                 setLeaderboard(response.data);
+                setIsFetchingStats(false)
             })
             .catch((error) => {
                 console.log(error);
@@ -33,16 +40,25 @@ const StatsPage: FunctionComponent<StatsPageProps> = (): ReactElement => {
     };
 
     useEffect(() => {
-        handleFetchLeaderboard();
-    }, [router])
+        if (isFetchingStats) handleFetchLeaderboard();
+    }, [router, isFetchingStats])
 
 
     return (
-        <main className="flex min-h-screen flex-col items-center py-20">
+        <main className="flex min-h-screen flex-col items-center py-14">
             <h2 className="text-white font-medium text-3xl">Leaderboard</h2>
 
             {
-                leaderboard &&
+                !isFetchingStats &&
+                <button
+                    onClick={() => handleFetchLeaderboard(true)}
+                    className="p-2 rounded-full bg-transparent text-gray-400 border-none mx-auto mt-5">
+                    Reload
+                </button>
+            }
+
+            {
+                leaderboard && !isFetchingStats &&
                 <div className="mt-6 w-full rounded-md overflow-hidden">
                     <table className="table-auto w-full">
                         <thead>
@@ -56,7 +72,7 @@ const StatsPage: FunctionComponent<StatsPageProps> = (): ReactElement => {
                             {
                                 leaderboard?.map((user, index) => (
                                     <tr key={index}>
-                                        <td className="text-white p-2">{index + 1}</td> 
+                                        <td className="text-white p-2">{index + 1}</td>
                                         <td className="text-white p-2 flex items-baseline gap-2">@{user.username} <span className="text-xs text-yellow-400 bg-yellow-300/20 py-[2px] px-1 rounded-md font-medium">{metrics(Number(user.points))?.status}</span></td>
                                         <td className="text-white p-2 font-semibold">{user.points}</td>
                                     </tr>
@@ -65,6 +81,10 @@ const StatsPage: FunctionComponent<StatsPageProps> = (): ReactElement => {
                         </tbody>
                     </table>
                 </div>
+            }
+            {
+                !leaderboard && isFetchingStats &&
+                <p className="text-white text-center mt-8">Fetching leaderboard...</p>
             }
 
             {/* <div className="my-8">

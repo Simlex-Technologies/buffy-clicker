@@ -74,6 +74,8 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     }, [iswindow, userProfileInformation]);
 
     useMemo(() => {
+        if (!iswindow) return;
+
         if (userId && userName) {
 
             // construct user information
@@ -97,7 +99,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
             console.log("🚀 ~ useMemo ~ userProfileInformation:", userProfileInformation)
             fetchUserProfileInformation();
         }
-    }, [userId, userName]);
+    }, [userId, userName, iswindow]);
 
     useMemo(() => {
         if (referralId && userProfileInformation && !isReferralCreated) {
