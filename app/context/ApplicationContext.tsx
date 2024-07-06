@@ -13,6 +13,12 @@ export type ApplicationContextData = {
     displayToast: (message: string, type: "success" | "error" | "info" | "warning") => void;
     isUserLoginPromptVisible: boolean;
     toggleUserLoginPrompt: () => void;
+    nextUpdateTimestamp: number;
+    updateNextUpdateTimestamp: (timestamp: number) => void;
+    timeLeft: string;
+    updateTimeLeft: (time: string) => void;
+    timesClickedPerSession: number;
+    updateTimesClickedPerSession: (times: number) => void;
 };
 
 // Create a context with the specified data type
@@ -28,6 +34,9 @@ const AppProvider: FunctionComponent<AppProviderProps> = ({ children }) => {
     // Define state for customer data
     const [userProfileInformation, setUserProfileInformation] = useState<UserProfileInformation | null>(null);
     const [isFetchingUserProfileInformation, setIsFetchingUserProfileInformation] = useState(false);
+    const [nextUpdateTimestamp, setNextUpdateTimestamp] = useState<number>(0);
+    const [timeLeft, setTimeLeft] = useState<string>('');
+    const [timesClickedPerSession, setTimesClickedPerSession] = useState<number>(0);
 
     // Define state for displaying login prompt
     const [showUserLoginPrompt, setShowUserLoginPrompt] = useState(false);
@@ -52,8 +61,6 @@ const AppProvider: FunctionComponent<AppProviderProps> = ({ children }) => {
 
             const user = await fetchUserFromDb(_userInfo.userId);
 
-            // return user;
-
             // Set the user information
             setUserProfileInformation(user);
         };
@@ -66,7 +73,13 @@ const AppProvider: FunctionComponent<AppProviderProps> = ({ children }) => {
         fetchUserProfileInformation: handleFetchUserInformation,
         displayToast,
         isUserLoginPromptVisible: showUserLoginPrompt,
-        toggleUserLoginPrompt: () => setShowUserLoginPrompt(!showUserLoginPrompt)
+        toggleUserLoginPrompt: () => setShowUserLoginPrompt(!showUserLoginPrompt),
+        nextUpdateTimestamp,
+        updateNextUpdateTimestamp: (timestamp: number) => setNextUpdateTimestamp(timestamp),
+        timeLeft,
+        updateTimeLeft: (time: string) => setTimeLeft(time),
+        timesClickedPerSession,
+        updateTimesClickedPerSession: (times: number) => setTimesClickedPerSession(times),
     };
 
     return (

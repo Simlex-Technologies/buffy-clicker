@@ -24,6 +24,11 @@ export class ApiRoutes {
   static Users: string = "api/users";
 
   /**
+   * The route to Users Daily Boosts endpoint
+   */
+    static UsersDailyBoosts: string = "api/users/dailyboosts";
+
+  /**
    * The route to Points endpoint
    */
   static Points: string = "api/points";

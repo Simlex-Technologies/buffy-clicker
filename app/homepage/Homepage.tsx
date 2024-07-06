@@ -18,14 +18,13 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
 
     const updateUserPoints = useUpdateUserPoints();
 
-    const { userProfileInformation, fetchUserProfileInformation } = useContext(ApplicationContext) as ApplicationContextData;
+    const {
+        userProfileInformation, fetchUserProfileInformation, 
+        timesClickedPerSession, updateTimesClickedPerSession: setTimesClickedPerSession
+    } = useContext(ApplicationContext) as ApplicationContextData;
 
-    // const params = useSearchParams();
-    // const userId = params.get('id');
-    // const userName = params.get('userName');
-
-    const [timesClickedPerSession, setTimesClickedPerSession] = useState<number>(0);
-    const [sessionLimit, setSessionLimit] = useState<number>(1000);
+    const sessionLimit = 1000;
+    // const [timesClickedPerSession, setTimesClickedPerSession] = useState<number>(0);
 
     const [taps, setTaps] = useState<number>(0);
 
@@ -69,14 +68,18 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
 
     // Use a hook to update the timesClickedPerSession back to zero after the user has stopped clicking. Decrement the timesclickedpersession by 3 till the limit is reached
     useEffect(() => {
-        const limit = 1000 - timesClickedPerSession;
-        if (limit >= sessionLimit) {
+        // const limit = 1000 - timesClickedPerSession;
+        // if (limit >= sessionLimit || timesClickedPerSession === 0) {
+        //     return;
+        // }
+        if (sessionLimit - timesClickedPerSession >= sessionLimit) {
+            setTimesClickedPerSession(0);
             return;
-        }
+        };
 
         const timer = setTimeout(() => {
             // Decrement the timesClickedPerSession by 3
-            setTimesClickedPerSession(Math.min(timesClickedPerSession - 3, 1000));
+            setTimesClickedPerSession(timesClickedPerSession - 3);
         }, DEBOUNCE_DELAY);
 
         return () => {
@@ -104,6 +107,8 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
             <div className="flex relative mb-12">
                 <motion.span
                     onClick={() => {
+                        if(sessionLimit - timesClickedPerSession <= 0) return;
+                        
                         setTaps(taps + 1)
                         setTimesClickedPerSession(timesClickedPerSession + 1)
                     }}
@@ -119,7 +124,7 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
 
             <div className="flex flex-row items-center text-white mb-5">
                 <p className="text-slate-400">Energy level:</p>&nbsp;
-                <span className="text-base">{1000 - timesClickedPerSession}/1000</span>
+                <span className="text-base">{sessionLimit - timesClickedPerSession}/{sessionLimit}</span>
             </div>
 
             {

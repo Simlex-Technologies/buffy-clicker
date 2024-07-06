@@ -12,5 +12,5 @@ export async function fetchUserFromDb(userId: number): Promise<UserProfileInform
         },
     });
 
-    return user as unknown as UserProfileInformation;
+    return user as UserProfileInformation;
 }

@@ -84,7 +84,10 @@ const StatsPage: FunctionComponent<StatsPageProps> = (): ReactElement => {
             }
             {
                 !leaderboard && isFetchingStats &&
-                <p className="text-white text-center mt-8">Fetching leaderboard...</p>
+                <>
+                    <div className="w-16 h-16 mt-20 border-4 border-blue-400 border-t-transparent border-solid rounded-full animate-spin" />
+                    {/* <p className="text-white text-center mt-8">Fetching leaderboard...</p> */}
+                </>
             }
 
             {/* <div className="my-8">

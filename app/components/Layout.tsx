@@ -23,7 +23,10 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     const createUser = useCreateUser();
     const createReferral = useCreateReferral();
 
-    const { userProfileInformation, fetchUserProfileInformation } = useContext(ApplicationContext) as ApplicationContextData;
+    const {
+        userProfileInformation, fetchUserProfileInformation,
+        nextUpdateTimestamp, updateTimeLeft: setTimeLeft, timeLeft, updateTimesClickedPerSession,
+    } = useContext(ApplicationContext) as ApplicationContextData;
     const [loaderIsVisible, setLoaderIsVisible] = useState(true);
     const [isReferralCreated, setIsReferralCreated] = useState(false);
 
@@ -73,6 +76,41 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
         }
     }, [iswindow, userProfileInformation]);
 
+
+    // Effect to start the countdown timer
+    useEffect(() => {
+        if (!nextUpdateTimestamp) return;
+
+        const updateCountdown = () => {
+            const now = new Date().getTime();
+            const distance = nextUpdateTimestamp - now;
+
+            if (distance < 0) {
+                setTimeLeft('00:00:00');
+                return;
+            }
+
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            setTimeLeft(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
+        };
+
+        // Update the countdown every second
+        const interval = setInterval(updateCountdown, 1000);
+
+        // Cleanup interval on component unmount
+        return () => clearInterval(interval);
+    }, [nextUpdateTimestamp]);
+
+    useEffect(() => {
+        if(timeLeft === '00:00:00') {
+            // reset the times clicked per session to 0 so that the user can click again
+            updateTimesClickedPerSession(0);
+        }
+    }, [timeLeft]);
+
     useMemo(() => {
         if (!iswindow) return;
 
@@ -82,6 +120,8 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
             const userInfo: UserProfileInformation = {
                 id: userId,
                 userId: Number(userId),
+                dailyFreeBoosters: 6,
+                level: 1,
                 username: userName
             };
 

@@ -200,4 +200,16 @@ export class ApplicationError extends BaseApplicationError {
         Text: "Failed to create referral",
         Code: "REFERRAL_1000",
     };
+
+    //#endregion
+
+    //#region Boosters Errors
+
+    /**
+     * The error message for ~ No free boosters available
+     */
+    static NoFreeBoosters: IApplicationError = {
+        Text: "No free boosters available",
+        Code: "BOOSTERS_1000",
+    };
 }

@@ -5,6 +5,7 @@ export type UserProfileInformation = {
   email?: string;
   emailVerified?: boolean;
   role?: string;
+  level: number;
   firstName?: string;
   lastName?: string;
   profilePhoto?: string;
@@ -12,6 +13,8 @@ export type UserProfileInformation = {
   referralCode?: string;
   referralCount?: number;
   points?: number;
-  createdAt?: string;
-  updatedAt?: string;
+  dailyFreeBoosters: number;
+  dailyBoostersExp?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 };

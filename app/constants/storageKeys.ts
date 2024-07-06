@@ -6,4 +6,14 @@ export class StorageKeys {
    * Key for the user's info
    */
   static readonly UserInformation = "userInformation";
+
+  /**
+   * Key for the boosters next time update
+   */
+  static readonly BoostersNextTimeUpdate = "boostersNextTimeUpdate";
+
+  /**
+   * Key for the boosters time left
+   */
+//   static readonly BoostersTimeLeft = "boostersTimeLeft";
 }

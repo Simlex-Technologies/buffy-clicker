@@ -193,11 +193,108 @@ export async function fetchLeaderboard(req: NextRequest) {
   // Fetch all users
   const users = await prisma.users.findMany({
     orderBy: {
-        // order by points in descending order
-        points: "desc",
+      // order by points in descending order
+      points: "desc",
     },
   });
 
   // Return all users
   return { data: users };
+}
+
+export async function updateFreeDailyBoosters(req: NextRequest) {
+  // Use search params to get the username
+  const searchParams = new URLSearchParams(req.url.split("?")[1]);
+
+  const username = searchParams.get("username");
+
+  const mode = searchParams.get("mode");
+
+  // Check if all required fields are provided
+  if (!username) {
+    return {
+      error: ApplicationError.MissingRequiredParameters.Text,
+      statusCode: StatusCodes.BadRequest,
+    };
+  }
+
+  // Check if user exists
+  const user = await prisma.users.findUnique({
+    where: {
+      username: username,
+    },
+  });
+
+  // If user exists, return error
+  if (!user) {
+    return {
+      error: ApplicationError.UserWithUsernameNotFound.Text,
+      errorCode: ApplicationError.UserWithUsernameNotFound.Code,
+      statusCode: StatusCodes.NotFound,
+    };
+  }
+
+  if (mode === "fetch") {
+    // If the expiration date is in the past, reset the user's free daily boosters
+    if (user.dailyBoostersExp && user.dailyBoostersExp < new Date()) {
+      const updatedUser = await prisma.users.update({
+        where: {
+          username: username,
+        },
+        data: {
+          dailyFreeBoosters: 6,
+          dailyBoostersExp: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
+      });
+
+      return {
+        message: "Successfully updated user's free daily boosters",
+        data: updatedUser,
+      };
+    } else {
+        return {
+            message: "Successfully fetched user's free daily boosters",
+            data: user,
+        };
+    }
+  }
+
+  // if we are updating the user's free daily boosters...
+
+  // Check if user has no free daily boosters and the expiration date is in the future
+  if (
+    user.dailyFreeBoosters <= 0 &&
+    user.dailyBoostersExp &&
+    user.dailyBoostersExp > new Date()
+  ) {
+    // We can not give the user more free daily boosters today
+    return {
+      error: ApplicationError.NoFreeBoosters.Text,
+      errorCode: ApplicationError.NoFreeBoosters.Code,
+      statusCode: StatusCodes.BadRequest,
+    };
+  }
+
+  // Update the user's free daily boosters and expiration date
+  const updatedUser = await prisma.users.update({
+    where: {
+      username: username,
+    },
+    data: {
+      dailyFreeBoosters: {
+        decrement: 1,
+      },
+      // set the expiration date to 24 hours from now if it is not set or if it is set to a date in the past
+      dailyBoostersExp:
+        user.dailyBoostersExp && user.dailyBoostersExp > new Date()
+          ? user.dailyBoostersExp
+          : new Date(Date.now() + 24 * 60 * 60 * 1000),
+    },
+  });
+
+  // Return the response
+  return {
+    message: "Successfully updated user's free daily boosters",
+    data: updatedUser,
+  };
 }
