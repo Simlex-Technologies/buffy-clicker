@@ -5,7 +5,7 @@ import { PointsUpdateRequest } from "../models/IPoints";
 import { ReferralCreationRequest } from "../models/IReferral";
 
 export const API = axios.create({
-  baseURL: ApiRoutes.BASE_URL_LIVE, 
+  baseURL: ApiRoutes.BASE_URL_LIVE,
 });
 
 //#region user
@@ -63,6 +63,14 @@ export function useFetchLeaderboard() {
   }
 
   return fetchLeaderboard;
+}
+
+export function useUpdateDailyBoosts() {
+  async function updateDailyBoosts(username: string, mode: "fetch" | "update") {
+    return API.post(`${ApiRoutes.UsersDailyBoosts}/?username=${username}&mode=${mode}`);
+  }
+
+  return updateDailyBoosts;
 }
 
 //#endregion
