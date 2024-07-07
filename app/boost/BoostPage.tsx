@@ -77,7 +77,7 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
         handleUpdateDailyBoosts({ fetchOnly: false });
     };
 
-    const timeLeftIsValid = timeLeft !== '00:00:00';
+    const timeLeftIsValid = timeLeft && timeLeft !== '00:00:00';
 
     function displayLevelMessage() {
         if (!userLevel) return;
