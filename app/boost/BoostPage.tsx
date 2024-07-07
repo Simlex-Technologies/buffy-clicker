@@ -4,8 +4,11 @@ import CustomImage from "../components/ui/image";
 import images from "@/public/images";
 import { ApplicationContext, ApplicationContextData } from "../context/ApplicationContext";
 import { metrics } from "../constants/userMetrics";
-import { useUpdateDailyBoosts } from "../api/apiClient";
+import { useUpdateDailyBoosts, useUpdateUserLevels } from "../api/apiClient";
 import { StorageKeys } from "../constants/storageKeys";
+import { levels } from "../constants/levels";
+import { MultiLevelRequest } from "../models/ILevel";
+import ComponentLoader from "../components/Loader/ComponentLoader";
 
 interface BoostPageProps {
 
@@ -14,16 +17,22 @@ interface BoostPageProps {
 const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
 
     const updateDailyBoosts = useUpdateDailyBoosts();
+    const updateUserLevels = useUpdateUserLevels();
 
     const {
-        userProfileInformation, fetchUserProfileInformation,
+        userProfileInformation, fetchUserProfileInformation, updateUserProfileInformation,
         nextUpdateTimestamp, updateNextUpdateTimestamp,
-        timeLeft, updateTimeLeft: setTimeLeft
+        timeLeft
     } = useContext(ApplicationContext) as ApplicationContextData;
 
-    const points = userProfileInformation?.points;
+    const userPoints = userProfileInformation?.points;
+    const userLevel = userProfileInformation?.level;
+    const nextLevelFee = userLevel && levels.find((level) => level.level === (userLevel + 1))?.fee;
+    const highestLevel = levels[levels.length - 1].level;
 
     const [isRequestingBoosts, setIsRequestingBoosts] = useState(false);
+    const [upgradeErrorMsg, setUpgradeErrorMsg] = useState<string>();
+    const [isUpgradingLevel, setIsUpgradingLevel] = useState(false);
 
     async function handleUpdateDailyBoosts({ fetchOnly = false }: { fetchOnly: boolean }) {
         if (timeLeft !== '00:00:00' && timeLeft !== '') return;
@@ -33,11 +42,9 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
         await updateDailyBoosts(userProfileInformation?.username as string, fetchOnly ? "fetch" : "update")
             .then((response) => {
 
-                fetchUserProfileInformation();
-
                 if (!fetchOnly) {
                     // save the next update timestamp to the state & session storage
-                    if (response.data?.data.dailyFreeBoosters !== 0) {
+                    if (response.data?.data.dailyFreeBoosters >= 0) {
                         const nextUpdate = new Date();
                         nextUpdate.setMinutes(nextUpdate.getMinutes() + 1);
                         updateNextUpdateTimestamp(nextUpdate.getTime());
@@ -46,24 +53,21 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
                         // console.log("🚀 ~ handleUpdateDailyBoosts ~ sessionStorage updated");
                     }
                 };
+
+                fetchUserProfileInformation();
+
+                setIsRequestingBoosts(false);
             })
             .catch((error) => {
                 console.log(error);
-            })
-            .finally(() => {
-                setIsRequestingBoosts(false);
             });
     };
 
     function requestDailyBoosts() {
-        if(isRequestingBoosts) return;
+        if (isRequestingBoosts) return;
 
         const boosterExpirationDate = userProfileInformation?.dailyBoostersExp;
         const freeBoosters = userProfileInformation?.dailyFreeBoosters;
-
-        // console.log("🚀 ~ requestDailyBoosts ~ boosterExpirationDate:", boosterExpirationDate)
-        // console.log("🚀 ~ requestDailyBoosts ~ freeBoosters:", freeBoosters)
-        // console.log(freeBoosters && boosterExpirationDate && boosterExpirationDate.getTime() > Date.now() && freeBoosters == 0);
 
         if (freeBoosters && boosterExpirationDate && boosterExpirationDate.getTime() > Date.now() && freeBoosters == 0) {
             console.log("You can't request daily boosts yet");
@@ -73,34 +77,63 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
         handleUpdateDailyBoosts({ fetchOnly: false });
     };
 
-    // Effect to start the countdown timer
-    // useEffect(() => {
-    //     if (!nextUpdateTimestamp) return;
+    const timeLeftIsValid = timeLeft !== '00:00:00';
 
-    //     const updateCountdown = () => {
-    //         const now = new Date().getTime();
-    //         const distance = nextUpdateTimestamp - now;
+    function displayLevelMessage() {
+        if (!userLevel) return;
 
-    //         if (distance < 0) {
-    //             setTimeLeft('00:00:00');
-    //             return;
-    //         }
+        const chargePoints = levels.find((level) => level.level === (userLevel + 1))?.fee;
 
-    //         const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    //         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    //         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        if(userLevel == highestLevel) {
+            return "You've reached the highest level";
+        }
 
-    //         setTimeLeft(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-    //     };
+        const message = levels.map((level) => {
+            if (level.level === userLevel) {
+                return `${chargePoints?.toLocaleString()} points to reach level ${level.level + 1}`;
+            }
+        })
 
-    //     // Update the countdown every second
-    //     const interval = setInterval(updateCountdown, 1000);
+        return message;
+    };
 
-    //     // Cleanup interval on component unmount
-    //     return () => clearInterval(interval);
-    // }, [nextUpdateTimestamp]);
+    async function requestLevelUpgrade() {
+        if (userPoints && userLevel) {
+            const chargePoints = levels.find((level) => level.level === (userLevel + 1))?.fee;
 
-    const timeLeftIsValid = timeLeft && timeLeft !== '00:00:00';
+            if (!chargePoints) {
+                console.log("Invalid level");
+                return;
+            };
+
+            if (userPoints < chargePoints) {
+                setUpgradeErrorMsg("Insufficient points to upgrade");
+                console.log("Insufficient points to upgrade");
+                return;
+            };
+
+            // construct the data
+            const data: MultiLevelRequest = {
+                level: userLevel + 1,
+                username: userProfileInformation?.username as string,
+            };
+
+            setIsUpgradingLevel(true);
+
+            await updateUserLevels(data)
+                .then((response) => {
+                    // console.log("🚀 ~ .then ~ response:", response)
+                    updateUserProfileInformation(response.data?.data);
+                    // fetchUserProfileInformation();
+                })
+                .catch((error) => {
+                    console.log(error);
+                })
+                .finally(() => {
+                    setIsUpgradingLevel(false);
+                });
+        }
+    }
 
     useEffect(() => {
         handleUpdateDailyBoosts({ fetchOnly: true });
@@ -116,20 +149,27 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
         }
     }, []);
 
+    useMemo(() => {
+        if (upgradeErrorMsg) {
+            setTimeout(() => {
+                setUpgradeErrorMsg(undefined);
+            }, 5000);
+        }
+    }, [upgradeErrorMsg])
 
     return (
         <main className="flex min-h-screen flex-col items-center py-14">
             {/* <h2 className="text-white font-medium text-3xl">Boost Points</h2> */}
 
             {
-                points &&
+                userPoints &&
                 <div className="flex flex-col items-center gap-2 mb-6">
                     <p className="text-gray-300 text-xs">Available balance</p>
                     <div className="flex items-center gap-1">
                         <span className="w-7 h-7 relative grid place-items-center">
                             <CustomImage src={images.coin} alt="Coin" />
                         </span>
-                        <h1 className=" font-black text-3xl text-white">{(points).toLocaleString()}{metrics(points)?.pointSuffix}</h1>
+                        <h1 className=" font-black text-3xl text-white">{(userPoints).toLocaleString()}{metrics(userPoints)?.pointSuffix}</h1>
                     </div>
                 </div>
             }
@@ -138,7 +178,7 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
                 <span className="font-bold text-white text-sm">Daily boosters (Free)</span>
                 <button
                     onClick={() => requestDailyBoosts()}
-                    className={`bg-gray-700 rounded-3xl flex flex-row items-end justify-between p-4 pr-5 hover:bg-gray-600 ${timeLeftIsValid || isRequestingBoosts ? "pointer-events-none opacity-70" : ""}`}>
+                    className={`bg-gray-700 rounded-3xl flex flex-row items-end justify-between p-4 pr-5 hover:bg-gray-600 ${isRequestingBoosts || nextUpdateTimestamp > 0 || userProfileInformation?.dailyFreeBoosters == 0 ? "pointer-events-none opacity-70" : ""}`}>
                     <div className="flex flex-row items-center gap-3">
                         <span className="w-7 h-7 relative grid place-items-center">
                             <CustomImage src={images.coin} alt="Coin" />
@@ -157,28 +197,29 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
                 </button>
             </div>
 
-            <div className="w-full flex flex-col gap-2">
-                <span className="font-bold text-white text-sm">Boosters</span>
-                <button className="bg-gray-700 rounded-3xl flex flex-row items-end justify-between p-4 pr-5 hover:bg-gray-600">
-                    <div className="flex flex-row items-center gap-3">
-                        <span className="w-7 h-7 relative grid place-items-center">
-                            <CustomImage src={images.coin} alt="Coin" className="grayscale" />
-                        </span>
-                        <div className="flex flex-col gap-[2px] items-start">
-                            <h5 className="text-white font-medium leading-3 text-base">Multitap</h5>
-                            <p className="text-white/60 text-sm">2k points for 2lvl</p>
+            {
+                userLevel &&
+                <div className="w-full flex flex-col">
+                    <span className="font-bold text-white text-sm mb-2">Boosters</span>
+                    <button
+                        onClick={() => requestLevelUpgrade()}
+                        className={`bg-gray-700 rounded-3xl flex flex-row items-center justify-between p-4 pr-5 hover:bg-gray-600 mb-1 ${isUpgradingLevel || userProfileInformation.level == highestLevel ? "pointer-events-none opacity-70" : ""}`}>
+                        <div className="flex flex-row items-center gap-3">
+                            <span className="w-7 h-7 relative grid place-items-center">
+                                <CustomImage src={images.coin} alt="Coin" className={userPoints && nextLevelFee && userPoints < nextLevelFee ? "grayscale" : ""} />
+                            </span>
+                            <div className="flex flex-col gap-[2px] items-start">
+                                <h5 className="text-white font-medium leading-3 text-base">Multitap</h5>
+                                <p className="text-white/60 text-sm">{displayLevelMessage()}</p>
+                            </div>
                         </div>
-                    </div>
-                    {/* <p className="text-white/50 text-sm">50 minutes left</p> */}
-                </button>
-            </div>
-
-            {/* <div className="my-8">
-                <span className="w-56 h-56 relative block mb-3">
-                    <CustomImage src={images.splash} alt="Buffy" />
-                </span>
-                <h4 className="text-white font-normal text-xl text-center">Coming Soon</h4>
-            </div> */}
+                        <span className="text-white/50 w-5 h-5 relative">
+                            {isUpgradingLevel && <ComponentLoader className="absolute inset-0 m-auto w-5 h-5" />}
+                        </span>
+                    </button>
+                    {upgradeErrorMsg && <p className="text-red-500/80 text-sm">{upgradeErrorMsg}</p>}
+                </div>
+            }
         </main>
     );
 }

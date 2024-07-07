@@ -6,7 +6,7 @@
 
 */
 -- AlterTable
-ALTER TABLE `Referrals` MODIFY `referredId` INTEGER NOT NULL;
+ALTER TABLE `referrals` MODIFY `referredId` INTEGER NOT NULL;
 
 -- CreateIndex
 CREATE UNIQUE INDEX `Referrals_referredId_key` ON `Referrals`(`referredId`);

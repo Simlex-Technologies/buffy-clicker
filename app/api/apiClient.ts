@@ -3,9 +3,10 @@ import { ApiRoutes } from "./apiRoutes";
 import { UserProfileInformation } from "../models/IUser";
 import { PointsUpdateRequest } from "../models/IPoints";
 import { ReferralCreationRequest } from "../models/IReferral";
+import { MultiLevelRequest } from "../models/ILevel";
 
 export const API = axios.create({
-  baseURL: ApiRoutes.BASE_URL_LIVE,
+  baseURL: ApiRoutes.BASE_URL_DEV,
 });
 
 //#region user
@@ -47,6 +48,14 @@ export function useUpdateUserPoints() {
   }
 
   return updateUserPoints;
+}
+
+export function useUpdateUserLevels() {
+    async function updateUserLevels(data: MultiLevelRequest) {
+        return API.post(ApiRoutes.UsersMultiLevels, data);
+    }
+    
+    return updateUserLevels;    
 }
 
 export function useCreateReferral() {

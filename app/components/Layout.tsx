@@ -24,7 +24,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     const createReferral = useCreateReferral();
 
     const {
-        userProfileInformation, fetchUserProfileInformation,
+        userProfileInformation, fetchUserProfileInformation, updateNextUpdateTimestamp,
         nextUpdateTimestamp, updateTimeLeft: setTimeLeft, timeLeft, updateTimesClickedPerSession,
     } = useContext(ApplicationContext) as ApplicationContextData;
     const [loaderIsVisible, setLoaderIsVisible] = useState(true);
@@ -87,6 +87,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
             if (distance < 0) {
                 setTimeLeft('00:00:00');
+                updateNextUpdateTimestamp(0); 
                 return;
             }
 
@@ -121,6 +122,8 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
                 id: userId,
                 userId: Number(userId),
                 dailyFreeBoosters: 6,
+                telegramTaskDone: false,
+                twitterTaskDone: false,
                 level: 1,
                 username: userName
             };

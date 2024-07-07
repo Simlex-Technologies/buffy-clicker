@@ -9,6 +9,7 @@ import { fetchUserFromDb } from "../api/services/fetchUserFromDb";
 export type ApplicationContextData = {
     isFetchingUserProfile: boolean;
     userProfileInformation: UserProfileInformation | null;
+    updateUserProfileInformation: (user: UserProfileInformation) => void;
     fetchUserProfileInformation: () => void;
     displayToast: (message: string, type: "success" | "error" | "info" | "warning") => void;
     isUserLoginPromptVisible: boolean;
@@ -70,6 +71,7 @@ const AppProvider: FunctionComponent<AppProviderProps> = ({ children }) => {
     const sharedData: ApplicationContextData = {
         isFetchingUserProfile: isFetchingUserProfileInformation,
         userProfileInformation,
+        updateUserProfileInformation: (user: UserProfileInformation) => setUserProfileInformation(user),
         fetchUserProfileInformation: handleFetchUserInformation,
         displayToast,
         isUserLoginPromptVisible: showUserLoginPrompt,

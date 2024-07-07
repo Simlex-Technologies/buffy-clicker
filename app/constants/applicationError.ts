@@ -212,4 +212,63 @@ export class ApplicationError extends BaseApplicationError {
         Text: "No free boosters available",
         Code: "BOOSTERS_1000",
     };
+
+    //#endregion
+
+    //#region Tasks Errors
+
+    /**
+     * The error message for ~ Telegram task already completed
+     */
+    static TelegramTaskAlreadyCompleted: IApplicationError = {
+        Text: "Telegram task already completed",
+        Code: "TASKS_1000",
+    };
+
+    /**
+     * The error message for ~ Twitter task already completed
+     */
+    static TwitterTaskAlreadyCompleted: IApplicationError = {
+        Text: "Twitter task already completed",
+        Code: "TASKS_1001",
+    };
+
+    //#endregion
+
+    //#region Level Errors
+
+    /**
+     * The error message for ~ Maximum level reached
+     */
+    static MaximumLevelReached: IApplicationError = {
+        Text: "Maximum level reached",
+        Code: "LEVEL_1000",
+    };
+
+    /**
+     * The error message for ~ Invalid level request
+     */
+    static InvalidLevelRequested: IApplicationError = {
+        Text: "Invalid level request",
+        Code: "LEVEL_1001",
+    };
+
+    /**
+     * The error message for ~ Not enough points to upgrade level
+     */
+    static NotEnoughPointsToUpgradeLevel: IApplicationError = {
+        Text: "Not enough points to upgrade level",
+        Code: "LEVEL_1002",
+    };
+    
+    /**
+     * The error message for ~ Failed to update user level
+     */
+    static FailedToUpdateUserLevel: IApplicationError = {
+        Text: "Failed to update user level",
+        Code: "LEVEL_1003",
+    };
+
+    //#endregion
+    
 }

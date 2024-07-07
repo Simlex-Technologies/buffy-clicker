@@ -74,7 +74,7 @@ const StatsPage: FunctionComponent<StatsPageProps> = (): ReactElement => {
                                     <tr key={index}>
                                         <td className="text-white p-2">{index + 1}</td>
                                         <td className="text-white p-2 flex items-baseline gap-2">@{user.username} <span className="text-xs text-yellow-400 bg-yellow-300/20 py-[2px] px-1 rounded-md font-medium">{metrics(Number(user.points))?.status}</span></td>
-                                        <td className="text-white p-2 font-semibold">{user.points}</td>
+                                        <td className="text-white p-2 font-semibold">{user.points.toLocaleString()}</td>
                                     </tr>
                                 ))
                             }

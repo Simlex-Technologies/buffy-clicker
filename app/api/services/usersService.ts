@@ -5,6 +5,9 @@ import { ApplicationError } from "@/app/constants/applicationError";
 import { StatusCodes } from "@/app/models/IStatusCodes";
 import { UserProfileInformation } from "@/app/models/IUser";
 import { PointsUpdateRequest } from "@/app/models/IPoints";
+import { Task } from "@/app/enums/ITask";
+import { MultiLevelRequest } from "@/app/models/ILevel";
+import { levels } from "@/app/constants/levels";
 
 export async function createUser(req: NextRequest) {
   // Get the body of the request
@@ -126,13 +129,75 @@ export async function updateUserPoints(req: NextRequest) {
     },
   });
 
-  // If user exists, return error
+  // If user does not exists, return error
   if (!user) {
     return {
       error: ApplicationError.UserWithUsernameNotFound.Text,
       errorCode: ApplicationError.UserWithUsernameNotFound.Code,
       statusCode: StatusCodes.NotFound,
     };
+  }
+
+  // If a specific task was provided, check if the task has not been done yet
+  if (request.task) {
+    const specifiedTask = request.task;
+
+    // If the specified task is telegram
+    if (specifiedTask === Task.TELEGRAM) {
+      // If the user has done the task, show error
+      if (user.telegramTaskDone) {
+        return {
+          error: ApplicationError.TelegramTaskAlreadyCompleted.Text,
+          errorCode: ApplicationError.TelegramTaskAlreadyCompleted.Code,
+          statusCode: StatusCodes.BadRequest,
+        };
+      }
+
+      // if we get here, it means the user has not done the task...
+
+      // increment the user's points
+      await incrementUserPoints(request.points, request.username, user.points);
+
+      // update the user's telegram task status
+      await prisma.users.update({
+        where: {
+          username: request.username,
+        },
+        data: {
+          telegramTaskDone: true,
+        },
+      });
+    }
+
+    // If the specified task is twitter and the user has done the task, show error
+    if (specifiedTask === Task.TWITTER) {
+      // If the user has done the task, show error
+      if (user.twitterTaskDone) {
+        return {
+          error: ApplicationError.TwitterTaskAlreadyCompleted.Text,
+          errorCode: ApplicationError.TwitterTaskAlreadyCompleted.Code,
+          statusCode: StatusCodes.BadRequest,
+        };
+      }
+
+      // if we get here, it means the user has not done the task...
+
+      // increment the user's points
+      await incrementUserPoints(request.points, request.username, user.points);
+
+      // update the user's telegram task status
+      await prisma.users.update({
+        where: {
+          username: request.username,
+        },
+        data: {
+          twitterTaskDone: true,
+        },
+      });
+    }
+
+    // Return the response
+    return { message: "Successfully updated user's point & task status" };
   }
 
   // Update the user's points
@@ -252,10 +317,10 @@ export async function updateFreeDailyBoosters(req: NextRequest) {
         data: updatedUser,
       };
     } else {
-        return {
-            message: "Successfully fetched user's free daily boosters",
-            data: user,
-        };
+      return {
+        message: "Successfully fetched user's free daily boosters",
+        data: user,
+      };
     }
   }
 
@@ -297,4 +362,106 @@ export async function updateFreeDailyBoosters(req: NextRequest) {
     message: "Successfully updated user's free daily boosters",
     data: updatedUser,
   };
+}
+
+async function incrementUserPoints(
+  points: number,
+  username: string,
+  currentPoints: number
+) {
+  await prisma.users.update({
+    where: {
+      username: username,
+    },
+    data: {
+      points: currentPoints + points,
+    },
+  });
+}
+
+export async function updateUserLevel(req: NextRequest) {
+  // Get the body of the request
+  const request = (await req.json()) as MultiLevelRequest;
+
+  // Check if all required fields are provided
+  if (!request.username) {
+    return {
+      error: ApplicationError.MissingRequiredParameters.Text,
+      statusCode: StatusCodes.BadRequest,
+    };
+  }
+
+  // Check if user exists
+  const user = await prisma.users.findUnique({
+    where: {
+      username: request.username,
+    },
+  });
+
+  // If user does not exists, return error
+  if (!user) {
+    return {
+      error: ApplicationError.UserWithUsernameNotFound.Text,
+      errorCode: ApplicationError.UserWithUsernameNotFound.Code,
+      statusCode: StatusCodes.NotFound,
+    };
+  }
+
+  // get the user's current level
+  const currentLevel = user.level;
+
+  // define the maximum level
+  const maximumLevel = 10;
+
+  // If the user's level is already at the maximum level, return error
+  if (currentLevel >= maximumLevel) {
+    return {
+      error: ApplicationError.MaximumLevelReached.Text,
+      errorCode: ApplicationError.MaximumLevelReached.Code,
+      statusCode: StatusCodes.BadRequest,
+    };
+  }
+
+  // initialize the requested level
+  const requestedLevel = levels.find((level) => level.level === request.level);
+
+  // If the level requested is not valid, return error
+  if (!requestedLevel) {
+    return {
+      error: ApplicationError.InvalidLevelRequested.Text,
+      errorCode: ApplicationError.InvalidLevelRequested.Code,
+      statusCode: StatusCodes.BadRequest,
+    };
+  }
+
+  // initialize the level fee
+  const requestedLevelFee = requestedLevel.fee;
+
+  console.log("🚀 ~ updateUserLevel ~ requestedLevelFee:", requestedLevelFee)
+  console.log("🚀 ~ updateUserLevel ~ points:", user.points)
+
+  // Check if the user's points are enough to level up
+  if (user.points < requestedLevelFee) {
+    return {
+      error: ApplicationError.NotEnoughPointsToUpgradeLevel.Text,
+      errorCode: ApplicationError.NotEnoughPointsToUpgradeLevel.Code,
+      statusCode: StatusCodes.BadRequest,
+    };
+  };
+
+  // Update the user's level and deduct the level fee from the user's points
+  const updatedUser = await prisma.users.update({
+    where: {
+      username: request.username,
+    },
+    data: {
+      level: request.level,
+        points: {
+            decrement: requestedLevelFee,
+        }
+    },
+  });
+
+  // Return the response
+  return { message: "Successfully updated user's level", data: updatedUser };
 }
