@@ -46,7 +46,7 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
                     // save the next update timestamp to the state & session storage
                     if (response.data?.data.dailyFreeBoosters >= 0) {
                         const nextUpdate = new Date();
-                        nextUpdate.setMinutes(nextUpdate.getHours() + 1);
+                        nextUpdate.setHours(nextUpdate.getHours() + 1);
                         updateNextUpdateTimestamp(nextUpdate.getTime());
                         // console.log("🚀 ~ handleUpdateDailyBoosts ~ nextUpdate", nextUpdate.getTime().toString());
                         sessionStorage.setItem(StorageKeys.BoostersNextTimeUpdate, nextUpdate.getTime().toString());
