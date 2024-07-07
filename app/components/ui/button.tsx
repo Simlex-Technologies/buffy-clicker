@@ -16,7 +16,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 {...props}
             >
                 {btnIcon && <span>{btnIcon}</span>}
-                {props.disabled && <ComponentLoader lightTheme isSmallLoader customBackground="#E86708" customLoaderColor="#0000" />}
+                {props.disabled && <ComponentLoader />}
                 {props.children}
             </button>
         );
