@@ -31,6 +31,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
     const [loaderIsVisible, setLoaderIsVisible] = useState(true);
     const [isReferralCreated, setIsReferralCreated] = useState(false);
+    const [isTimesClickedUpdated, setIsTimesClickedUpdated] = useState(false);
 
     const iswindow = typeof window !== 'undefined' ? true : false;
 
@@ -71,10 +72,13 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
     // Use a hook to update the timesClickedPerSession back to zero after the user has stopped clicking. Decrement the timesclickedpersession by 3 till the limit is reached
     useEffect(() => {
+        if(timesClickedPerSession === 0) return;
 
-        if (sessionLimit - timesClickedPerSession >= sessionLimit || timesClickedPerSession <= 0) {
+        if (sessionLimit - timesClickedPerSession >= sessionLimit && isTimesClickedUpdated) {
             // reset the state
             updateTimesClickedPerSession(0); 
+            // reset the session storage
+            sessionStorage.removeItem(StorageKeys.TimesClickedPerSession);
             return;
         };
 
@@ -85,6 +89,9 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
         // save the timesClickedPerSession to the session storage
         sessionStorage.setItem(StorageKeys.TimesClickedPerSession, timesClickedPerSession.toString());
+        
+        // set the state to true so that the timesClickedPerSession is updated
+        setIsTimesClickedUpdated(true);
 
         return () => {
             clearTimeout(timer);
@@ -97,6 +104,9 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
         if (retrievedTimesClickedPerSession) {
             updateTimesClickedPerSession(parseInt(retrievedTimesClickedPerSession));
+            
+            // set the state to true so that the timesClickedPerSession is updated
+            setIsTimesClickedUpdated(true);
         }
     }, []);
 
