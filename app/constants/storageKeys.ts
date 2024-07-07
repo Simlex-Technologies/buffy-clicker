@@ -13,7 +13,7 @@ export class StorageKeys {
   static readonly BoostersNextTimeUpdate = "boostersNextTimeUpdate";
 
   /**
-   * Key for the boosters time left
+   * Key for the times Clicked Per Session
    */
-//   static readonly BoostersTimeLeft = "boostersTimeLeft";
+  static readonly TimesClickedPerSession = "timesClickedPerSession";
 }

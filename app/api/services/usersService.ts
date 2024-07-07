@@ -8,6 +8,7 @@ import { PointsUpdateRequest } from "@/app/models/IPoints";
 import { Task } from "@/app/enums/ITask";
 import { MultiLevelRequest } from "@/app/models/ILevel";
 import { levels } from "@/app/constants/levels";
+import { dailyBoostLimit } from "@/app/constants/user";
 
 export async function createUser(req: NextRequest) {
   // Get the body of the request
@@ -301,13 +302,13 @@ export async function updateFreeDailyBoosters(req: NextRequest) {
 
   if (mode === "fetch") {
     // If the expiration date is in the past, reset the user's free daily boosters
-    if (user.dailyBoostersExp && user.dailyBoostersExp < new Date()) {
+    if (user.dailyBoostersExp && user.dailyBoostersExp < new Date() || user.dailyFreeBoosters > dailyBoostLimit) {
       const updatedUser = await prisma.users.update({
         where: {
           username: username,
         },
         data: {
-          dailyFreeBoosters: 6,
+          dailyFreeBoosters: dailyBoostLimit,
           dailyBoostersExp: new Date(Date.now() + 24 * 60 * 60 * 1000),
         },
       });

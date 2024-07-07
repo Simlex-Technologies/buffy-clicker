@@ -13,6 +13,7 @@ import { StorageKeys } from "../constants/storageKeys";
 import { splashScreenVariant } from "../animations/splashScreen";
 import { useCreateReferral, useCreateUser, useFetchUserInformation } from "../api/apiClient";
 import { ReferralCreationRequest } from "../models/IReferral";
+import { sessionLimit } from "../constants/user";
 
 interface LayoutProps {
     children?: ReactNode;
@@ -24,9 +25,10 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     const createReferral = useCreateReferral();
 
     const {
-        userProfileInformation, fetchUserProfileInformation, updateNextUpdateTimestamp,
+        userProfileInformation, fetchUserProfileInformation, updateNextUpdateTimestamp, timesClickedPerSession,
         nextUpdateTimestamp, updateTimeLeft: setTimeLeft, timeLeft, updateTimesClickedPerSession,
     } = useContext(ApplicationContext) as ApplicationContextData;
+
     const [loaderIsVisible, setLoaderIsVisible] = useState(true);
     const [isReferralCreated, setIsReferralCreated] = useState(false);
 
@@ -62,22 +64,55 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
             .catch((error) => {
                 console.error("Error creating referral", error);
             });
-    }
+    };
+
+    // const DEBOUNCE_DELAY_FOR_SESSION = 32400; // Delay for 3 clicks for 3hrs
+    const DEBOUNCE_DELAY_FOR_SESSION = 10800; // Delay for 1 click for 3hrs
+
+    // Use a hook to update the timesClickedPerSession back to zero after the user has stopped clicking. Decrement the timesclickedpersession by 3 till the limit is reached
+    useEffect(() => {
+
+        if (sessionLimit - timesClickedPerSession >= sessionLimit || timesClickedPerSession <= 0) {
+            // reset the state
+            updateTimesClickedPerSession(0); 
+            return;
+        };
+
+        const timer = setTimeout(() => {
+            // Decrement the timesClickedPerSession by 3
+            updateTimesClickedPerSession(timesClickedPerSession - 1);
+        }, DEBOUNCE_DELAY_FOR_SESSION);
+
+        // save the timesClickedPerSession to the session storage
+        sessionStorage.setItem(StorageKeys.TimesClickedPerSession, timesClickedPerSession.toString());
+
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [timesClickedPerSession]);
+
+    useEffect(() => {
+        // fetch the times clicked per session from the session storage
+        const retrievedTimesClickedPerSession = sessionStorage.getItem(StorageKeys.TimesClickedPerSession);
+
+        if (retrievedTimesClickedPerSession) {
+            updateTimesClickedPerSession(parseInt(retrievedTimesClickedPerSession));
+        }
+    }, []);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && userProfileInformation) {
+            setLoaderIsVisible(false);
             // Set a timeout to hide the loader after 5 seconds
-            const timeout = setTimeout(() => {
-                setLoaderIsVisible(false);
-            }, 3000);
+            // const timeout = setTimeout(() => {
+            // }, 3000); 
 
             // Cleanup function to clear the timeout if the component unmounts or dependencies change
-            return () => clearTimeout(timeout);
+            // return () => clearTimeout(timeout);
         }
     }, [iswindow, userProfileInformation]);
 
-
-    // Effect to start the countdown timer
+    // Effect to start the countdown timer for the next boost update
     useEffect(() => {
         if (!nextUpdateTimestamp) return;
 
@@ -132,14 +167,11 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
             // save to session storage
             sessionStorage.setItem(StorageKeys.UserInformation, JSON.stringify(userInfo));
-
-            console.log("Update session storage");
         }
 
         const userProfileInformation = sessionStorage.getItem(StorageKeys.UserInformation);
 
         if (userProfileInformation) {
-            console.log("🚀 ~ useMemo ~ userProfileInformation:", userProfileInformation)
             fetchUserProfileInformation();
         }
     }, [userId, userName, iswindow]);

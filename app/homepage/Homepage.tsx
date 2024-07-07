@@ -1,7 +1,7 @@
 "use client"
 import { ReactElement, FunctionComponent, useState, useContext, useMemo, useEffect } from "react"
 import images from "@/public/images";
-import { motion } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import CustomImage from "../components/ui/image";
 import { Icons } from "../components/ui/icons";
 // import { useSearchParams } from "next/navigation";
@@ -10,6 +10,8 @@ import { ApplicationContext, ApplicationContextData } from "../context/Applicati
 import { useUpdateUserPoints } from "../api/apiClient";
 import { PointsUpdateRequest } from "../models/IPoints";
 import { Metrics } from "../enums/IMetrics";
+import { StorageKeys } from "../constants/storageKeys";
+import { sessionLimit } from "../constants/user";
 
 interface HomepageProps {
 
@@ -23,9 +25,6 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
         userProfileInformation, fetchUserProfileInformation,
         timesClickedPerSession, updateTimesClickedPerSession: setTimesClickedPerSession
     } = useContext(ApplicationContext) as ApplicationContextData;
-
-    const sessionLimit = 1000;
-    // const [timesClickedPerSession, setTimesClickedPerSession] = useState<number>(0);
 
     const [taps, setTaps] = useState<number>(0);
 
@@ -67,26 +66,30 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
         };
     }, [taps]);
 
-    // Use a hook to update the timesClickedPerSession back to zero after the user has stopped clicking. Decrement the timesclickedpersession by 3 till the limit is reached
-    useEffect(() => {
-        // const limit = 1000 - timesClickedPerSession;
-        // if (limit >= sessionLimit || timesClickedPerSession === 0) {
-        //     return;
-        // }
-        if (sessionLimit - timesClickedPerSession >= sessionLimit) {
-            setTimesClickedPerSession(0);
-            return;
-        };
+    // // const DEBOUNCE_DELAY_FOR_SESSION = 32400; // Delay for 3 clicks for 3hrs
+    // const DEBOUNCE_DELAY_FOR_SESSION = 10800; // Delay for 1 click for 3hrs
 
-        const timer = setTimeout(() => {
-            // Decrement the timesClickedPerSession by 3
-            setTimesClickedPerSession(timesClickedPerSession - 3);
-        }, DEBOUNCE_DELAY);
+    // // Use a hook to update the timesClickedPerSession back to zero after the user has stopped clicking. Decrement the timesclickedpersession by 3 till the limit is reached
+    // useEffect(() => {
 
-        return () => {
-            clearTimeout(timer);
-        };
-    }, [timesClickedPerSession]);
+    //     if (sessionLimit - timesClickedPerSession >= sessionLimit || timesClickedPerSession <= 0) {
+    //         // reset the state
+    //         setTimesClickedPerSession(0);
+    //         return;
+    //     };
+
+    //     const timer = setTimeout(() => {
+    //         // Decrement the timesClickedPerSession by 3
+    //         setTimesClickedPerSession(timesClickedPerSession - 1);
+    //     }, DEBOUNCE_DELAY_FOR_SESSION);
+
+    //     // save the timesClickedPerSession to the session storage
+    //     sessionStorage.setItem(StorageKeys.TimesClickedPerSession, timesClickedPerSession.toString());
+
+    //     return () => {
+    //         clearTimeout(timer);
+    //     };
+    // }, [timesClickedPerSession]);
 
     function swapColorBasedOnStatus() {
         if (metrics(taps)?.status === Metrics.NOOB) {
@@ -102,7 +105,16 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
         } else if (metrics(taps)?.status === Metrics.LEGEND) {
             return "text-white/60";
         }
-    }
+    };
+
+    // useEffect(() => {
+    //     // fetch the times clicked per session from the session storage
+    //     const retrievedTimesClickedPerSession = sessionStorage.getItem(StorageKeys.TimesClickedPerSession);
+
+    //     if (retrievedTimesClickedPerSession) {
+    //         setTimesClickedPerSession(parseInt(retrievedTimesClickedPerSession));
+    //     }
+    // }, []);
 
     return (
         <main className="flex min-h-screen flex-col items-center py-20">
@@ -134,6 +146,25 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                     </div>
 
                     <div className="flex relative mb-12">
+                        {/* <div className="absolute w-full h-full border-2 border-white">
+                            <AnimatePresence>
+                                {
+                                taps > 0 && 
+                                ([...Array(taps)]).map((click) => (
+                                    <motion.div
+                                        key={click}
+                                        initial={{ opacity: 1, y: 0 }}
+                                        animate={{ opacity: 0, y: -50 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 1 }}
+                                        className="click-animation"
+                                    >
+                                        +1
+                                    </motion.div>
+                                ))
+                                }
+                            </AnimatePresence>
+                        </div> */}
                         <motion.span
                             onClick={() => {
                                 if (sessionLimit - timesClickedPerSession <= 0) return;

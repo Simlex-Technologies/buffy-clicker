@@ -29,7 +29,7 @@ model Users {
     referralCode      String    @unique
     referralCount     Int       @default(0)
     points            Int       @default(0)
-    dailyFreeBoosters Int       @default(6)
+    dailyFreeBoosters Int       @default(4)
     dailyBoostersExp  DateTime?
     telegramTaskDone  Boolean   @default(false)
     twitterTaskDone   Boolean   @default(false)

@@ -9,6 +9,7 @@ import { StorageKeys } from "../constants/storageKeys";
 import { levels } from "../constants/levels";
 import { MultiLevelRequest } from "../models/ILevel";
 import ComponentLoader from "../components/Loader/ComponentLoader";
+import { dailyBoostLimit } from "../constants/user";
 
 interface BoostPageProps {
 
@@ -46,7 +47,7 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
                     // save the next update timestamp to the state & session storage
                     if (response.data?.data.dailyFreeBoosters >= 0) {
                         const nextUpdate = new Date();
-                        nextUpdate.setHours(nextUpdate.getHours() + 1);
+                        nextUpdate.setMilliseconds(nextUpdate.getMilliseconds() + 1);
                         updateNextUpdateTimestamp(nextUpdate.getTime());
                         // console.log("🚀 ~ handleUpdateDailyBoosts ~ nextUpdate", nextUpdate.getTime().toString());
                         sessionStorage.setItem(StorageKeys.BoostersNextTimeUpdate, nextUpdate.getTime().toString());
@@ -185,7 +186,7 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
                         </span>
                         <div className="flex flex-col gap-[2px] items-start">
                             <h5 className="text-white font-medium leading-3 text-base">Full energy</h5>
-                            <p className="text-white/60 text-sm">{userProfileInformation?.dailyFreeBoosters}/6 available</p>
+                            <p className="text-white/60 text-sm">{userProfileInformation?.dailyFreeBoosters}/{dailyBoostLimit} available</p>
                         </div>
                     </div>
                     {

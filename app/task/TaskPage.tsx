@@ -19,7 +19,7 @@ interface TaskStatusProps {
 }
 
 const TaskStatus: FunctionComponent<TaskStatusProps> = ({ status }) => {
-    return (<p className={`text-sm ${status ? "text-green-300/80" : "text-white/60"}`}>{status ? "Done" : "Undone"}</p>);
+    return (<p className={`text-sm ${status ? "text-green-300/80" : "text-white/60"}`}>{status ? "Done" : "Not done"}</p>);
 }
 
 const TaskPage: FunctionComponent<TaskPageProps> = (): ReactElement => {
@@ -35,7 +35,7 @@ const TaskPage: FunctionComponent<TaskPageProps> = (): ReactElement => {
 
     const [isVerifyingTask, setIsVerifyingTask] = useState(false);
 
-    const telegramPoints = 5000;
+    const telegramPoints = 4000;
     const twitterPoints = 4000;
 
     async function handleVerifyTask(specifiedTask: Task) {

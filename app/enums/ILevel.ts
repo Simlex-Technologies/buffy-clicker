@@ -9,4 +9,5 @@ export enum Level {
     Level8 = 8,
     Level9 = 9,
     Level10 = 10,
+    Level11 = 11
 }
