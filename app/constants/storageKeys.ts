@@ -15,5 +15,5 @@ export class StorageKeys {
   /**
    * Key for the times Clicked Per Session
    */
-  static readonly BoostRefillEndTime = "boostRefillEndTime";
+  static readonly BoostRefillEndTime = (username: string) => `boostRefillEndTime-${username}`;
 }

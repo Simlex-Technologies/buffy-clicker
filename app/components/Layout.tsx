@@ -71,8 +71,8 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     const DEBOUNCE_DELAY_FOR_SESSION = 10800; // Delay for 1 click for 3hrs
 
     useEffect(() => {
-        // Load the end time from sessionStorage when the component mounts
-        const storedBoostRefillEndTime = sessionStorage.getItem(StorageKeys.BoostRefillEndTime);
+        // Load the end time from localStorage when the component mounts
+        const storedBoostRefillEndTime = localStorage.getItem(StorageKeys.BoostRefillEndTime(userProfileInformation?.username as string));
 
         if (storedBoostRefillEndTime) {
             const endTime = new Date(storedBoostRefillEndTime).getTime();
@@ -96,8 +96,8 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     useEffect(() => {
         if(!isBoostTimeRetrieved) return;
 
-        console.log("🚀 ~ useEffect ~ timesClickedPerSession:", timesClickedPerSession);
-        
+        // console.log("🚀 ~ useEffect ~ timesClickedPerSession:", timesClickedPerSession);
+
         if (sessionLimit - timesClickedPerSession >= sessionLimit || timesClickedPerSession <= 0) {
             // reset the state
             updateTimesClickedPerSession(0);
@@ -107,7 +107,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
         // Calculate the end time and store it
         const remainingTicks = timesClickedPerSession;
         const endTime = new Date(Date.now() + remainingTicks * DEBOUNCE_DELAY_FOR_SESSION);
-        sessionStorage.setItem(StorageKeys.BoostRefillEndTime, endTime.toString());
+        localStorage.setItem(StorageKeys.BoostRefillEndTime(userProfileInformation?.username as string), endTime.toString());
         
         // Calculate the remaining time
         // const remainingTime = remainingTicks * DEBOUNCE_DELAY_FOR_SESSION;
