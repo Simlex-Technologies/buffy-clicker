@@ -28,7 +28,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
     const {
         userProfileInformation, fetchUserProfileInformation, updateUserProfileInformation,
-        updateNextUpdateTimestamp, timesClickedPerSession,
+        updateNextUpdateTimestamp, timesClickedPerSession, updateChecker,
         nextUpdateTimestamp, updateTimeLeft: setTimeLeft, timeLeft, updateTimesClickedPerSession,
     } = useContext(ApplicationContext) as ApplicationContextData;
 
@@ -101,6 +101,18 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
         }
     }, [userProfileInformation, isBoostTimeRetrieved]);
 
+    useEffect(() => {
+        if (sessionStorage.getItem('checker')) return;
+        sessionStorage.setItem('checker', JSON.stringify(new Date().getMinutes()));
+    }, []);
+    useEffect(() => {
+        // check if session storage is available
+        const ssChecker = JSON.parse(sessionStorage.getItem('checker') as string);
+        if (ssChecker) {
+            updateChecker(ssChecker);
+        }
+    }, [])
+
     // Use a hook to update the timesClickedPerSession back to zero after the user has stopped clicking. Decrement the timesclickedpersession by 3 till the limit is reached
     useEffect(() => {
         if (!isBoostTimeRetrieved) return;
@@ -116,7 +128,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
         let endTime: Date | null = null;
 
-        if(userProfileInformation?.boostRefillEndTime) {
+        if (userProfileInformation?.boostRefillEndTime) {
             endTime = new Date(userProfileInformation.boostRefillEndTime);
         } else {
             // Calculate the end time and store it
@@ -147,6 +159,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
         };
     }, [timesClickedPerSession, isBoostTimeRetrieved]);
 
+    // hook to hide the loader after window is loaded and user profile information is fetched
     useEffect(() => {
         if (typeof window !== 'undefined' && userProfileInformation) {
             setLoaderIsVisible(false);

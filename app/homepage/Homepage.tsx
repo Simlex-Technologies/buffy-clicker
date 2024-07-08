@@ -22,7 +22,7 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
     const updateUserPoints = useUpdateUserPoints();
 
     const {
-        userProfileInformation, fetchUserProfileInformation,
+        userProfileInformation, fetchUserProfileInformation, ssChecker,
         timesClickedPerSession, updateTimesClickedPerSession: setTimesClickedPerSession
     } = useContext(ApplicationContext) as ApplicationContextData;
 
@@ -194,7 +194,10 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                             <span className="text-xl">{userProfileInformation.referralCount * 1000}</span>
                         </div>
                     }
-                </>}
+
+                    <span className="opacity-10 text-white mt-10">T: {ssChecker}</span>
+                </>
+            }
         </main>
     );
 }
