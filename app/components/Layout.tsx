@@ -31,7 +31,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
     const [loaderIsVisible, setLoaderIsVisible] = useState(true);
     const [isReferralCreated, setIsReferralCreated] = useState(false);
-    const [isTimesClickedUpdated, setIsTimesClickedUpdated] = useState(false);
+    const [isBoostTimeRetrieved, setIsBoostTimeRetrieved] = useState(false);
 
     const iswindow = typeof window !== 'undefined' ? true : false;
 
@@ -70,45 +70,63 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     // const DEBOUNCE_DELAY_FOR_SESSION = 32400; // Delay for 3 clicks for 3hrs
     const DEBOUNCE_DELAY_FOR_SESSION = 10800; // Delay for 1 click for 3hrs
 
+    useEffect(() => {
+        // Load the end time from sessionStorage when the component mounts
+        const storedBoostRefillEndTime = sessionStorage.getItem(StorageKeys.BoostRefillEndTime);
+
+        if (storedBoostRefillEndTime) {
+            const endTime = new Date(storedBoostRefillEndTime).getTime();
+            const now = Date.now();
+            const remainingTime = endTime - now;
+
+            if (remainingTime > 0) {
+                const remainingTicks = Math.ceil(remainingTime / DEBOUNCE_DELAY_FOR_SESSION);
+                updateTimesClickedPerSession(remainingTicks);
+                console.log("🚀 ~ useEffect ~ remainingTicks:", remainingTicks)
+            } else {
+                updateTimesClickedPerSession(0);
+            }
+        };
+
+        // update retrieval status
+        setIsBoostTimeRetrieved(true);
+    }, [])
+
     // Use a hook to update the timesClickedPerSession back to zero after the user has stopped clicking. Decrement the timesclickedpersession by 3 till the limit is reached
     useEffect(() => {
-        if(timesClickedPerSession === 0) return;
+        if(!isBoostTimeRetrieved) return;
 
-        if (sessionLimit - timesClickedPerSession >= sessionLimit && isTimesClickedUpdated) {
+        console.log("🚀 ~ useEffect ~ timesClickedPerSession:", timesClickedPerSession);
+        
+        if (sessionLimit - timesClickedPerSession >= sessionLimit || timesClickedPerSession <= 0) {
             // reset the state
-            updateTimesClickedPerSession(0); 
-            // reset the session storage
-            sessionStorage.removeItem(StorageKeys.TimesClickedPerSession);
+            updateTimesClickedPerSession(0);
             return;
         };
-
-        const timer = setTimeout(() => {
-            // Decrement the timesClickedPerSession by 3
-            updateTimesClickedPerSession(timesClickedPerSession - 1);
-        }, DEBOUNCE_DELAY_FOR_SESSION);
-
-        // save the timesClickedPerSession to the session storage
-        sessionStorage.setItem(StorageKeys.TimesClickedPerSession, timesClickedPerSession.toString());
         
-        // set the state to true so that the timesClickedPerSession is updated
-        setIsTimesClickedUpdated(true);
+        // Calculate the end time and store it
+        const remainingTicks = timesClickedPerSession;
+        const endTime = new Date(Date.now() + remainingTicks * DEBOUNCE_DELAY_FOR_SESSION);
+        sessionStorage.setItem(StorageKeys.BoostRefillEndTime, endTime.toString());
+        
+        // Calculate the remaining time
+        // const remainingTime = remainingTicks * DEBOUNCE_DELAY_FOR_SESSION;
+
+        let timer: NodeJS.Timeout;
+
+        if (timesClickedPerSession > 0) {
+            timer = setTimeout(() => {
+                // Decrement the timesClickedPerSession by 3
+                updateTimesClickedPerSession(timesClickedPerSession - 1);
+            }, DEBOUNCE_DELAY_FOR_SESSION);
+        }
 
         return () => {
-            clearTimeout(timer);
+            if (timer) {
+                clearTimeout(timer);
+            }
         };
-    }, [timesClickedPerSession]);
-
-    useEffect(() => {
-        // fetch the times clicked per session from the session storage
-        const retrievedTimesClickedPerSession = sessionStorage.getItem(StorageKeys.TimesClickedPerSession);
-
-        if (retrievedTimesClickedPerSession) {
-            updateTimesClickedPerSession(parseInt(retrievedTimesClickedPerSession));
-            
-            // set the state to true so that the timesClickedPerSession is updated
-            setIsTimesClickedUpdated(true);
-        }
-    }, []);
+    }, [timesClickedPerSession, isBoostTimeRetrieved]);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && userProfileInformation) {
@@ -132,7 +150,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
             if (distance < 0) {
                 setTimeLeft('00:00:00');
-                updateNextUpdateTimestamp(0); 
+                updateNextUpdateTimestamp(0);
                 return;
             }
 
@@ -151,7 +169,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     }, [nextUpdateTimestamp]);
 
     useEffect(() => {
-        if(timeLeft === '00:00:00') {
+        if (timeLeft === '00:00:00') {
             // reset the times clicked per session to 0 so that the user can click again
             updateTimesClickedPerSession(0);
         }
