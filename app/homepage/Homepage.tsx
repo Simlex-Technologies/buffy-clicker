@@ -22,7 +22,7 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
     const updateUserPoints = useUpdateUserPoints();
 
     const {
-        userProfileInformation, fetchUserProfileInformation, ssChecker,
+        userProfileInformation, fetchUserProfileInformation,
         timesClickedPerSession, updateTimesClickedPerSession: setTimesClickedPerSession
     } = useContext(ApplicationContext) as ApplicationContextData;
 
@@ -119,7 +119,7 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
     return (
         <main className="flex min-h-screen flex-col items-center py-20">
             {
-                userProfileInformation &&
+                userProfileInformation && 
                 <>
                     <div className="flex flex-col items-center mb-12">
                         <div className="flex flex-row gap-2 items-center">
@@ -167,10 +167,15 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                         </div> */}
                         <motion.span
                             onClick={() => {
+                                if(timesClickedPerSession === undefined) return;
+
                                 if (sessionLimit - timesClickedPerSession <= 0) return;
 
                                 setTaps(taps + (1 * userProfileInformation.level))
-                                setTimesClickedPerSession(timesClickedPerSession + 1)
+                                setTimesClickedPerSession(timesClickedPerSession + 1);
+
+                                // save the timesClickedPerSession to the session storage
+                                sessionStorage.setItem(StorageKeys.TimesClickedPerSession, (timesClickedPerSession + 1).toString());
                             }}
                             whileTap={{
                                 // scale: 1.1,
@@ -182,10 +187,13 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                         </motion.span>
                     </div>
 
-                    <div className="flex flex-row items-center text-white mb-5">
-                        <p className="text-slate-400">Energy level:</p>&nbsp;
-                        <span className="text-base">{sessionLimit - timesClickedPerSession}/{sessionLimit}</span>
-                    </div>
+                    {
+                        timesClickedPerSession !== undefined &&
+                        <div className="flex flex-row items-center text-white mb-5">
+                            <p className="text-slate-400">Energy level:</p>&nbsp;
+                            <span className="text-base">{sessionLimit - timesClickedPerSession}/{sessionLimit}</span>
+                        </div>
+                    }
 
                     {
                         userProfileInformation.referralCount &&
@@ -194,8 +202,6 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                             <span className="text-xl">{userProfileInformation.referralCount * 1000}</span>
                         </div>
                     }
-
-                    <span className="opacity-10 text-white mt-10">T: {ssChecker}</span>
                 </>
             }
         </main>

@@ -18,10 +18,8 @@ export type ApplicationContextData = {
     updateNextUpdateTimestamp: (timestamp: number) => void;
     timeLeft: string;
     updateTimeLeft: (time: string) => void;
-    timesClickedPerSession: number;
+    timesClickedPerSession: number | undefined;
     updateTimesClickedPerSession: (times: number) => void;
-    ssChecker: string;
-    updateChecker: (checker: string) => void;
 };
 
 // Create a context with the specified data type
@@ -39,8 +37,7 @@ const AppProvider: FunctionComponent<AppProviderProps> = ({ children }) => {
     const [isFetchingUserProfileInformation, setIsFetchingUserProfileInformation] = useState(false);
     const [nextUpdateTimestamp, setNextUpdateTimestamp] = useState<number>(0);
     const [timeLeft, setTimeLeft] = useState<string>('');
-    const [timesClickedPerSession, setTimesClickedPerSession] = useState<number>(0);
-    const [ssChecker, setSSChecker] = useState<string>('');
+    const [timesClickedPerSession, setTimesClickedPerSession] = useState<number>();
 
     // Define state for displaying login prompt
     const [showUserLoginPrompt, setShowUserLoginPrompt] = useState(false);
@@ -85,8 +82,6 @@ const AppProvider: FunctionComponent<AppProviderProps> = ({ children }) => {
         updateTimeLeft: (time: string) => setTimeLeft(time),
         timesClickedPerSession,
         updateTimesClickedPerSession: (times: number) => setTimesClickedPerSession(times),
-        ssChecker,
-        updateChecker: (checker: string) => setSSChecker(checker)
     };
 
     return (
