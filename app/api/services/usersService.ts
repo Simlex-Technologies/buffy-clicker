@@ -302,7 +302,10 @@ export async function updateFreeDailyBoosters(req: NextRequest) {
 
   if (mode === "fetch") {
     // If the expiration date is in the past, reset the user's free daily boosters
-    if (user.dailyBoostersExp && user.dailyBoostersExp < new Date() || user.dailyFreeBoosters > dailyBoostLimit) {
+    if (
+      (user.dailyBoostersExp && user.dailyBoostersExp < new Date()) ||
+      user.dailyFreeBoosters > dailyBoostLimit
+    ) {
       const updatedUser = await prisma.users.update({
         where: {
           username: username,
@@ -362,6 +365,92 @@ export async function updateFreeDailyBoosters(req: NextRequest) {
   return {
     message: "Successfully updated user's free daily boosters",
     data: updatedUser,
+  };
+}
+
+export async function updateBoostRefillEndTime(req: NextRequest) {
+  // Use search params to get the username
+  const searchParams = new URLSearchParams(req.url.split("?")[1]);
+
+  const username = searchParams.get("username");
+
+  const refillEndTime = searchParams.get("refillEndTime");
+
+  // Check if all required fields are provided
+  if (!username || !refillEndTime) {
+    return {
+      error: ApplicationError.MissingRequiredParameters.Text,
+      statusCode: StatusCodes.BadRequest,
+    };
+  }
+
+  // Check if user exists
+  const user = await prisma.users.findUnique({
+    where: {
+      username: username,
+    },
+  });
+
+  // If user exists, return error
+  if (!user) {
+    return {
+      error: ApplicationError.UserWithUsernameNotFound.Text,
+      errorCode: ApplicationError.UserWithUsernameNotFound.Code,
+      statusCode: StatusCodes.NotFound,
+    };
+  }
+
+  // Update the user's boost refill time
+  const updatedUser = await prisma.users.update({
+    where: {
+      username: username,
+    },
+    data: {
+      boostRefillEndTime: new Date(refillEndTime),
+    },
+  });
+
+  // Return the response
+  return {
+    message: "Successfully updated user's boost refill end time",
+    data: updatedUser,
+  };
+}
+
+export async function fetchBoostRefillEndTime(req: NextRequest) {
+  // Use search params to get the username
+  const searchParams = new URLSearchParams(req.url.split("?")[1]);
+
+  const username = searchParams.get("username");
+
+  // Check if all required fields are provided
+  if (!username) {
+    return {
+      error: ApplicationError.MissingRequiredParameters.Text,
+      statusCode: StatusCodes.BadRequest,
+    };
+  }
+
+  // Check if user exists
+  const user = await prisma.users.findUnique({
+    where: {
+      username: username,
+    },
+  });
+
+  // If user exists, return error
+  if (!user) {
+    return {
+      error: ApplicationError.UserWithUsernameNotFound.Text,
+      errorCode: ApplicationError.UserWithUsernameNotFound.Code,
+      statusCode: StatusCodes.NotFound,
+    };
+  }
+
+  // Return the response
+  return {
+    message: "Successfully fetched user's boost refill end time",
+    data: user,
   };
 }
 
@@ -438,8 +527,8 @@ export async function updateUserLevel(req: NextRequest) {
   // initialize the level fee
   const requestedLevelFee = requestedLevel.fee;
 
-  console.log("🚀 ~ updateUserLevel ~ requestedLevelFee:", requestedLevelFee)
-  console.log("🚀 ~ updateUserLevel ~ points:", user.points)
+  console.log("🚀 ~ updateUserLevel ~ requestedLevelFee:", requestedLevelFee);
+  console.log("🚀 ~ updateUserLevel ~ points:", user.points);
 
   // Check if the user's points are enough to level up
   if (user.points < requestedLevelFee) {
@@ -448,7 +537,7 @@ export async function updateUserLevel(req: NextRequest) {
       errorCode: ApplicationError.NotEnoughPointsToUpgradeLevel.Code,
       statusCode: StatusCodes.BadRequest,
     };
-  };
+  }
 
   // Update the user's level and deduct the level fee from the user's points
   const updatedUser = await prisma.users.update({
@@ -457,9 +546,9 @@ export async function updateUserLevel(req: NextRequest) {
     },
     data: {
       level: request.level,
-        points: {
-            decrement: requestedLevelFee,
-        }
+      points: {
+        decrement: requestedLevelFee,
+      },
     },
   });
 

@@ -34,6 +34,11 @@ export class ApiRoutes {
   static UsersMultiLevels: string = "api/users/multilevels";
 
   /**
+   * The route to Boost Refill End Time endpoint
+   */
+  static UsersBoostRefillEndTime: string = "api/users/boost-refill";
+
+  /**
    * The route to Points endpoint
    */
   static Points: string = "api/points";

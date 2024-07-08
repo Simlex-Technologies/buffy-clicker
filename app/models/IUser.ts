@@ -15,6 +15,7 @@ export type UserProfileInformation = {
   points?: number;
   dailyFreeBoosters: number;
   dailyBoostersExp?: Date;
+  boostRefillEndTime?: Date;
   telegramTaskDone: boolean;
   twitterTaskDone: boolean;
   createdAt?: Date;

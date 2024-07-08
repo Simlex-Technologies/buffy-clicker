@@ -6,7 +6,7 @@ import { ReferralCreationRequest } from "../models/IReferral";
 import { MultiLevelRequest } from "../models/ILevel";
 
 export const API = axios.create({
-  baseURL: ApiRoutes.BASE_URL_LIVE,
+  baseURL: ApiRoutes.BASE_URL_DEV,
 });
 
 //#region user
@@ -56,6 +56,22 @@ export function useUpdateUserLevels() {
     }
     
     return updateUserLevels;    
+}
+
+export function useUpdateBoostRefillEndTime() {
+    async function updateBoostRefillEndTime(data: { username: string, refillEndTime: Date }) {
+        return API.post(`${ApiRoutes.UsersBoostRefillEndTime}?username=${data.username}&refillEndTime=${data.refillEndTime}`);
+    }
+    
+    return updateBoostRefillEndTime;   
+}
+
+export function useFetchUserBoostRefillEndTime() {
+    async function fetchUserBoostRefillEndTime(username: string) {
+        return API.get(`${ApiRoutes.UsersBoostRefillEndTime}?username=${username}`);
+    }
+    
+    return fetchUserBoostRefillEndTime;   
 }
 
 export function useCreateReferral() {
