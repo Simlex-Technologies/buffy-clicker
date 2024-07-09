@@ -4,7 +4,7 @@ import CustomImage from "../components/ui/image";
 import images from "@/public/images";
 import { ApplicationContext, ApplicationContextData } from "../context/ApplicationContext";
 import { metrics } from "../constants/userMetrics";
-import { useUpdateDailyBoosts, useUpdateUserLevels } from "../api/apiClient";
+import { useUpdateBoostRefillEndTime, useUpdateDailyBoosts, useUpdateUserLevels } from "../api/apiClient";
 import { StorageKeys } from "../constants/storageKeys";
 import { levels } from "../constants/levels";
 import { MultiLevelRequest } from "../models/ILevel";
@@ -19,10 +19,11 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
 
     const updateDailyBoosts = useUpdateDailyBoosts();
     const updateUserLevels = useUpdateUserLevels();
+    const updateBoostRefillEndTime = useUpdateBoostRefillEndTime();
 
     const {
         userProfileInformation, fetchUserProfileInformation, updateUserProfileInformation,
-        nextUpdateTimestamp, updateNextUpdateTimestamp,
+        nextUpdateTimestamp, updateNextUpdateTimestamp, updateTimesClickedPerSession,
         timeLeft
     } = useContext(ApplicationContext) as ApplicationContextData;
 
@@ -41,7 +42,7 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
         if (!fetchOnly) setIsRequestingBoosts(true);
 
         await updateDailyBoosts(userProfileInformation?.username as string, fetchOnly ? "fetch" : "update")
-            .then((response) => {
+            .then(async (response) => {
 
                 if (!fetchOnly) {
                     // save the next update timestamp to the state & session storage
@@ -50,8 +51,21 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
                         nextUpdate.setMilliseconds(nextUpdate.getMilliseconds() + 1);
                         updateNextUpdateTimestamp(nextUpdate.getTime());
                         // console.log("🚀 ~ handleUpdateDailyBoosts ~ nextUpdate", nextUpdate.getTime().toString());
-                        sessionStorage.setItem(StorageKeys.BoostersNextTimeUpdate, nextUpdate.getTime().toString());
+                        // sessionStorage.setItem(StorageKeys.BoostersNextTimeUpdate, nextUpdate.getTime().toString());
                         // console.log("🚀 ~ handleUpdateDailyBoosts ~ sessionStorage updated");
+
+                        // update boost end time in the database to 3hours before now
+                        const endTime = new Date(Date.now() - 3 * 60 * 60 * 1000);
+                        console.log("🚀 ~ .then ~ endTime:", endTime)
+
+                        await updateBoostRefillEndTime({ username: userProfileInformation?.username as string, refillEndTime: endTime })
+                            .then((response) => {
+                                console.log("Boost refill time reset", response);
+                                updateTimesClickedPerSession(0);
+                            })
+                            .catch((error) => {
+                                console.error("Error resetting boost refill time", error);
+                            });
                     }
                 };
 
@@ -85,7 +99,7 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
 
         const chargePoints = levels.find((level) => level.level === (userLevel + 1))?.fee;
 
-        if(userLevel == highestLevel) {
+        if (userLevel == highestLevel) {
             return "You've reached the highest level";
         }
 

@@ -1,5 +1,5 @@
 "use client"
-import { FunctionComponent, ReactElement, ReactNode, useState, useEffect, useContext, useMemo } from "react";
+import { FunctionComponent, ReactElement, ReactNode, useState, useEffect, useContext, useCallback, useMemo } from "react";
 import CustomImage from "./ui/image";
 import images from "@/public/images";
 import { motion } from "framer-motion";
@@ -13,7 +13,7 @@ import { StorageKeys } from "../constants/storageKeys";
 import { splashScreenVariant } from "../animations/splashScreen";
 import { useCreateReferral, useCreateUser, useFetchUserBoostRefillEndTime, useUpdateBoostRefillEndTime } from "../api/apiClient";
 import { ReferralCreationRequest } from "../models/IReferral";
-import { sessionLimit } from "../constants/user";
+import { debounce } from "lodash"
 
 interface LayoutProps {
     children?: ReactNode;
@@ -141,6 +141,103 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
             handleCreateReferral(userProfileInformation.username, referralId);
         }
     }, [referralId, userProfileInformation]);
+
+
+
+    const handleUpdateBoostRefillEndTime = useCallback(debounce(async (endTime: Date) => {
+        console.log("DB ACTION TRIGGERED!");
+        await updateBoostRefillEndTime({ username: userProfileInformation?.username as string, refillEndTime: endTime })
+            .then((response) => {
+                console.log("Boost refill time updated", response);
+            })
+            .catch((error) => {
+                console.error("Error updating boost refill time", error);
+            });
+    }, 1000), []);
+
+    // Convert date to UTC
+    function toUTCDate(date: Date): Date {
+        return new Date(date.toISOString());
+    };
+
+    async function handleFetchUserBoostRefillEndTime(username: string) {
+        await fetchUserBoostRefillEndTime(username)
+            .then((response) => {
+                setIsBoostTimeRetrieved(true);
+                updateUserProfileInformation(response?.data.data);
+
+                console.log("response?.data.data.boostRefillEndTime ", response?.data.data.boostRefillEndTime);
+
+                // const currentTime = toUTCDate(new Date(Date.now()));
+                const currentTime = new Date(Date.now() + 60 * 60 * 1000);
+                const boostRefillEndTime = toUTCDate(new Date(new Date(response?.data.data.boostRefillEndTime).getTime() - 0));
+
+                console.log("🚀 ~ .then ~ boostRefillEndTime:", boostRefillEndTime.toISOString());
+                console.log("🚀 ~ .then ~ currentTime:", currentTime.toISOString());
+
+                if (boostRefillEndTime < currentTime) {
+                    updateTimesClickedPerSession(0);
+                    return;
+                };
+
+                const timeDifference = boostRefillEndTime.getTime() - currentTime.getTime();
+                const remainingTicks = Math.max(Math.floor(timeDifference / DEBOUNCE_DELAY_FOR_SESSION), 0);
+                updateTimesClickedPerSession(remainingTicks);
+
+                console.log("Boost refill time fetched", response);
+            })
+            .catch((error) => {
+                console.error("Error fetching boost refill time", error);
+            });
+    };
+
+    // const DEBOUNCE_DELAY_FOR_SESSION = 32400; // Delay for 3 clicks for 3hrs
+    const DEBOUNCE_DELAY_FOR_SESSION = 10800; // Delay for 1 click for 3hrs
+
+    // hook to fetch the user's boost refill end time
+    useEffect(() => {
+        if (userProfileInformation && !isBoostTimeRetrieved) {
+            handleFetchUserBoostRefillEndTime(userProfileInformation.username);
+        }
+    }, [userProfileInformation, isBoostTimeRetrieved]);
+
+    // Use a hook to update the timesClickedPerSession back to zero after the user has stopped clicking. Decrement the timesclickedpersession by 3 till the limit is reached
+    useEffect(() => {
+        if (!isBoostTimeRetrieved || timesClickedPerSession === undefined) return;
+
+        if(timesClickedPerSession === 0) return;
+
+        let endTime: Date | null = null;
+        const currentTime = toUTCDate(new Date(Date.now() + 60 * 60 * 1000));
+
+        if (userProfileInformation?.boostRefillEndTime && toUTCDate(new Date(userProfileInformation.boostRefillEndTime)) > currentTime) {
+            console.log("🚀 ~ useEffect ~ boostRefillEndTime:", userProfileInformation.boostRefillEndTime)
+            endTime = toUTCDate(new Date(new Date(userProfileInformation.boostRefillEndTime).getTime() - 60 * 60 * 1000));
+            console.log("🚀 ~ useEffect ~ endTime 1:", endTime)
+        } else {
+            const remainingTicks = timesClickedPerSession;
+            endTime = toUTCDate(new Date(Date.now() + remainingTicks * DEBOUNCE_DELAY_FOR_SESSION));
+            console.log("🚀 ~ useEffect ~ endTime 2:", endTime)
+        }
+
+        let timer: NodeJS.Timeout;
+
+        handleUpdateBoostRefillEndTime(endTime as Date);
+
+        if (timesClickedPerSession > 0) {
+            timer = setTimeout(async () => {
+                updateTimesClickedPerSession(Math.max(timesClickedPerSession - 1, 0));
+
+                // await handleUpdateBoostRefillEndTime(endTime as Date);
+            }, DEBOUNCE_DELAY_FOR_SESSION);
+        }
+
+        return () => {
+            if (timer) {
+                clearTimeout(timer);
+            }
+        };
+    }, [timesClickedPerSession, isBoostTimeRetrieved]);
 
     return (
         <motion.div
