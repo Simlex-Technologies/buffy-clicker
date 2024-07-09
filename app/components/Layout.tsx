@@ -211,15 +211,18 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
         let endTime: Date | null = null;
         const currentTime = toUTCDate(new Date(Date.now() + 60 * 60 * 1000));
 
-        if (userProfileInformation?.boostRefillEndTime && toUTCDate(new Date(userProfileInformation.boostRefillEndTime)) > currentTime) {
-            console.log("🚀 ~ useEffect ~ boostRefillEndTime:", userProfileInformation.boostRefillEndTime)
-            endTime = toUTCDate(new Date(new Date(userProfileInformation.boostRefillEndTime).getTime() - 60 * 60 * 1000));
-            console.log("🚀 ~ useEffect ~ endTime 1:", endTime)
-        } else {
-            const remainingTicks = timesClickedPerSession;
-            endTime = toUTCDate(new Date(Date.now() + remainingTicks * DEBOUNCE_DELAY_FOR_SESSION));
-            console.log("🚀 ~ useEffect ~ endTime 2:", endTime)
-        }
+        const remainingTicks = timesClickedPerSession;
+        endTime = toUTCDate(new Date(Date.now() + remainingTicks * DEBOUNCE_DELAY_FOR_SESSION));
+
+        // if (userProfileInformation?.boostRefillEndTime && toUTCDate(new Date(userProfileInformation.boostRefillEndTime)) > currentTime) {
+        //     console.log("🚀 ~ useEffect ~ boostRefillEndTime:", userProfileInformation.boostRefillEndTime)
+        //     endTime = toUTCDate(new Date(new Date(userProfileInformation.boostRefillEndTime).getTime() - 60 * 60 * 1000));
+        //     console.log("🚀 ~ useEffect ~ endTime 1:", endTime)
+        // } else {
+        //     const remainingTicks = timesClickedPerSession;
+        //     endTime = toUTCDate(new Date(Date.now() + remainingTicks * DEBOUNCE_DELAY_FOR_SESSION));
+        //     console.log("🚀 ~ useEffect ~ endTime 2:", endTime)
+        // }
 
         let timer: NodeJS.Timeout;
 
