@@ -8,6 +8,8 @@ import task from "./images/task.png";
 import boost from "./images/boost.png";
 import stats from "./images/stats.png";
 import splash from "./images/splash.png";
+import buffy_nft from "./images/buffy_nft.jpg";
+import nft_coin from "./images/nft_coin.png";
 
 export default {
   avatar,
@@ -17,5 +19,7 @@ export default {
   task,
   boost,
   stats,
-  splash
+  splash,
+  buffy_nft,
+  nft_coin
 };

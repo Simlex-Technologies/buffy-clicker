@@ -29,7 +29,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     const {
         userProfileInformation, fetchUserProfileInformation, updateUserProfileInformation,
         updateNextUpdateTimestamp, timesClickedPerSession,
-        nextUpdateTimestamp, updateTimeLeft: setTimeLeft, timeLeft, updateTimesClickedPerSession,
+        nextUpdateTimestamp, updateTimeLeft: setTimeLeft, updateTimesClickedPerSession,
     } = useContext(ApplicationContext) as ApplicationContextData;
 
     const [loaderIsVisible, setLoaderIsVisible] = useState(true);
@@ -70,109 +70,14 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
             });
     };
 
-    async function handleUpdateBoostRefillEndTime(endTime: Date) {
-        await updateBoostRefillEndTime({ username: userProfileInformation?.username as string, refillEndTime: endTime })
-            .then((response) => {
-                console.log("Boost refill time updated", response);
-            })
-            .catch((error) => {
-                console.error("Error updating boost refill time", error);
-            });
-    };
-
-    async function handleFetchUserBoostRefillEndTime(username: string) {
-        await fetchUserBoostRefillEndTime(username)
-            .then((response) => {
-                setIsBoostTimeRetrieved(true);
-                updateUserProfileInformation(response?.data.data);
-                console.log("Boost refill time fetched", response);
-            })
-            .catch((error) => {
-                console.error("Error fetching boost refill time", error);
-            });
-    };
-
-    // const DEBOUNCE_DELAY_FOR_SESSION = 32400; // Delay for 3 clicks for 3hrs
-    const DEBOUNCE_DELAY_FOR_SESSION = 10800; // Delay for 1 click for 3hrs
-
-    useEffect(() => {
-        if (userProfileInformation && !isBoostTimeRetrieved) {
-            handleFetchUserBoostRefillEndTime(userProfileInformation.username);
-        }
-    }, [userProfileInformation, isBoostTimeRetrieved]);
-
-    // Use a hook to update the timesClickedPerSession back to zero after the user has stopped clicking. Decrement the timesclickedpersession by 3 till the limit is reached
-    useEffect(() => {
-        console.log("Times clicked per session updated", timesClickedPerSession);
-
-        if (!isBoostTimeRetrieved || timesClickedPerSession === undefined) return;
-
-        console.log("🚀 ~ useEffect ~ timesClickedPerSession:", timesClickedPerSession);
-
-        // if (sessionLimit - timesClickedPerSession >= sessionLimit || timesClickedPerSession <= 0) {
-        //     console.log("HIT HERE!!!");
-        //     // reset the state
-        //     updateTimesClickedPerSession(0);
-        //     return;
-        // };
-
-        let endTime: Date | null = null;
-
-        // check if the boost refill end time is not in the past
-        const currentTime = new Date(Date.now());
-
-        if (userProfileInformation?.boostRefillEndTime && new Date(userProfileInformation.boostRefillEndTime) > currentTime) {
-            endTime = new Date(userProfileInformation.boostRefillEndTime);
-        } else {
-            // Calculate the end time and store it
-            const remainingTicks = timesClickedPerSession;
-            endTime = new Date(Date.now() + remainingTicks * DEBOUNCE_DELAY_FOR_SESSION);
-        }
-
-        console.log("🚀 ~ useEffect ~ remainingTicks:", timesClickedPerSession)
-        console.log("🚀 ~ useEffect ~ endTime:", endTime)
-
-        // Calculate the remaining time
-        // const remainingTime = remainingTicks * DEBOUNCE_DELAY_FOR_SESSION;
-
-        let timer: NodeJS.Timeout;
-
-        if (timesClickedPerSession > 0) {
-            console.log("🚀 ~ useEffect ~ timesClickedPerSession > 0:", timesClickedPerSession);
-
-            timer = setTimeout(async () => {
-                // Decrement the timesClickedPerSession by 3
-                updateTimesClickedPerSession(timesClickedPerSession - 1);
-
-                // update times clicked in session storage
-                sessionStorage.setItem(StorageKeys.TimesClickedPerSession, String(timesClickedPerSession - 1));
-
-                // Update the boost refill end time in the database
-                await handleUpdateBoostRefillEndTime(endTime as Date);
-            }, DEBOUNCE_DELAY_FOR_SESSION);
-        }
-
-        return () => {
-            if (timer) {
-                clearTimeout(timer);
-            }
-        };
-    }, [timesClickedPerSession, isBoostTimeRetrieved]);
-
     // hook to hide the loader after window is loaded and user profile information is fetched
     useEffect(() => {
         if (typeof window !== 'undefined' && userProfileInformation) {
             setLoaderIsVisible(false);
-            // Set a timeout to hide the loader after 5 seconds
-            // const timeout = setTimeout(() => {
-            // }, 3000); 
-
-            // Cleanup function to clear the timeout if the component unmounts or dependencies change
-            // return () => clearTimeout(timeout);
         }
     }, [iswindow, userProfileInformation]);
 
-    // Effect to start the countdown timer for the next boost update
+    // Effect to start the countdown timer for the next free daily boost update
     useEffect(() => {
         if (!nextUpdateTimestamp) return;
 
@@ -200,27 +105,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
         return () => clearInterval(interval);
     }, [nextUpdateTimestamp]);
 
-    // useEffect(() => {
-    //     if (timeLeft === '00:00:00') {
-    //         // reset the times clicked per session to 0 so that the user can click again
-    //         updateTimesClickedPerSession(0);
-    //     }
-    // }, [timeLeft]);
-
-    useEffect(() => {
-        // checked session storage for times clicked per session
-        const timesClicked = sessionStorage.getItem(StorageKeys.TimesClickedPerSession);
-
-        if (timesClicked) {
-            updateTimesClickedPerSession(Number(timesClicked));
-            return;
-        }
-        
-        console.log("🚀 ~ useEffect ~ timesClicked:", timesClicked);
-
-        updateTimesClickedPerSession(0);
-    }, [])
-
+    // hook to create user profile
     useMemo(() => {
         if (!iswindow) return;
 
@@ -250,9 +135,9 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
         }
     }, [userId, userName, iswindow]);
 
+    // hook to create referral if referralId & user info is available, and referral is not created yet
     useMemo(() => {
         if (referralId && userProfileInformation && !isReferralCreated) {
-            console.log("Calling referral creation")
             handleCreateReferral(userProfileInformation.username, referralId);
         }
     }, [referralId, userProfileInformation]);

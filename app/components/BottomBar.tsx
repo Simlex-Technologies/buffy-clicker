@@ -42,7 +42,12 @@ const BottomBar: FunctionComponent<BottomBarProps> = (): ReactElement => {
             title: "Stats",
             icon: images.stats,
             href: "/stats"
-        }
+        },
+        {
+            title: "NFT",
+            icon: images.nft_coin,
+            href: "/nft"
+        },
     ]
 
     return (
