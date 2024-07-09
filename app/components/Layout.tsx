@@ -144,9 +144,9 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
 
 
-    const handleUpdateBoostRefillEndTime = useCallback(debounce(async (endTime: Date) => {
+    const handleUpdateBoostRefillEndTime = useCallback(debounce(async (username: string, endTime: Date) => {
         console.log("DB ACTION TRIGGERED!");
-        await updateBoostRefillEndTime({ username: userProfileInformation?.username as string, refillEndTime: endTime })
+        await updateBoostRefillEndTime({ username, refillEndTime: endTime })
             .then((response) => {
                 console.log("Boost refill time updated", response);
             })
@@ -197,6 +197,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     // hook to fetch the user's boost refill end time
     useEffect(() => {
         if (userProfileInformation && !isBoostTimeRetrieved) {
+            console.log("TIME TO RETRIEVE")
             handleFetchUserBoostRefillEndTime(userProfileInformation.username);
         }
     }, [userProfileInformation, isBoostTimeRetrieved]);
@@ -222,7 +223,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
         let timer: NodeJS.Timeout;
 
-        handleUpdateBoostRefillEndTime(endTime as Date);
+        handleUpdateBoostRefillEndTime(userProfileInformation?.username as string, endTime as Date);
 
         if (timesClickedPerSession > 0) {
             timer = setTimeout(async () => {
