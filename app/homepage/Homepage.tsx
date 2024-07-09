@@ -1,5 +1,5 @@
 "use client"
-import { ReactElement, FunctionComponent, useState, useContext, useMemo, useEffect } from "react"
+import { ReactElement, FunctionComponent, useState, useContext, useMemo, useEffect, useCallback } from "react"
 import images from "@/public/images";
 import { AnimatePresence, motion } from "framer-motion"
 import CustomImage from "../components/ui/image";
@@ -9,8 +9,8 @@ import { ApplicationContext, ApplicationContextData } from "../context/Applicati
 import { useFetchUserBoostRefillEndTime, useUpdateBoostRefillEndTime, useUpdateUserPoints } from "../api/apiClient";
 import { PointsUpdateRequest } from "../models/IPoints";
 import { Metrics } from "../enums/IMetrics";
-import { StorageKeys } from "../constants/storageKeys";
 import { sessionLimit } from "../constants/user";
+import { debounce } from "lodash"
 
 interface HomepageProps {
 
@@ -126,7 +126,7 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
 
 
 
-    async function handleUpdateBoostRefillEndTime(endTime: Date) {
+    async function _handleUpdateBoostRefillEndTime(endTime: Date) {
         await updateBoostRefillEndTime({ username: userProfileInformation?.username as string, refillEndTime: endTime })
             .then((response) => {
                 console.log("Boost refill time updated", response);
@@ -135,6 +135,16 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                 console.error("Error updating boost refill time", error);
             });
     };
+    const handleUpdateBoostRefillEndTime = useCallback(debounce(async (endTime: Date) => {
+        console.log("DB ACTION TRIGGERED!");
+        await updateBoostRefillEndTime({ username: userProfileInformation?.username as string, refillEndTime: endTime })
+            .then((response) => {
+                console.log("Boost refill time updated", response);
+            })
+            .catch((error) => {
+                console.error("Error updating boost refill time", error);
+            });
+    }, 1000), []);
 
     async function handleFetchUserBoostRefillEndTime(username: string) {
         await fetchUserBoostRefillEndTime(username)
@@ -188,7 +198,7 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
             console.log("🚀 ~ useEffect ~ boostRefillEndTime:", userProfileInformation.boostRefillEndTime)
             endTime = toUTCDate(new Date(new Date(userProfileInformation.boostRefillEndTime).getTime() - 60 * 60 * 1000));
             console.log("🚀 ~ useEffect ~ endTime 1:", endTime)
-        } else { 
+        } else {
             const remainingTicks = timesClickedPerSession;
             endTime = toUTCDate(new Date(Date.now() + remainingTicks * DEBOUNCE_DELAY_FOR_SESSION));
             console.log("🚀 ~ useEffect ~ endTime 2:", endTime)
@@ -203,6 +213,8 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
         if (timesClickedPerSession > 0) {
             timer = setTimeout(async () => {
                 updateTimesClickedPerSession(Math.max(timesClickedPerSession - 1, 0));
+
+                // await handleUpdateBoostRefillEndTime(endTime as Date);
             }, DEBOUNCE_DELAY_FOR_SESSION);
         }
 
