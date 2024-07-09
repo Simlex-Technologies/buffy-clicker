@@ -198,11 +198,11 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
 
         let timer: NodeJS.Timeout;
 
+        handleUpdateBoostRefillEndTime(endTime as Date);
+
         if (timesClickedPerSession > 0) {
             timer = setTimeout(async () => {
                 updateTimesClickedPerSession(Math.max(timesClickedPerSession - 1, 0));
-
-                await handleUpdateBoostRefillEndTime(endTime as Date);
             }, DEBOUNCE_DELAY_FOR_SESSION);
         }
 

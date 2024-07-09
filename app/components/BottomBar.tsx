@@ -72,7 +72,7 @@ const BottomBar: FunctionComponent<BottomBarProps> = (): ReactElement => {
                                         repeat: Infinity
                                     }
                                 }}
-                                className="w-9 h-9 relative block">
+                                className="w-7 h-7 relative block">
                                 <CustomImage src={link.icon} alt="Buffy" />
                             </motion.span>
                             {link.title}
