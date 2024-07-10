@@ -20,7 +20,7 @@ export default async function RootLayout({
     // Check if user is connected to internet
 
     return (
-        <html lang="en" data-theme={"light"}>
+        <html lang="en" data-theme={"light"} className='bg-white'>
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
 

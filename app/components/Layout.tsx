@@ -115,7 +115,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
             const userInfo: UserProfileInformation = {
                 id: userId,
                 userId: Number(userId),
-                dailyFreeBoosters: 6,
+                dailyFreeBoosters: 4,
                 telegramTaskDone: false,
                 twitterTaskDone: false,
                 level: 1,
