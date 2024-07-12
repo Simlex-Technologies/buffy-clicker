@@ -115,8 +115,6 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
         if (!iswindow) return;
 
         if (userId && userName) {
-            console.log("🚀 ~ useMemo ~ userName:", userName)
-            console.log("🚀 ~ useMemo ~ userId:", userId)
 
             // construct user information
             const userInfo: UserProfileInformation = {
@@ -128,8 +126,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
                 level: 1,
                 username: userName
             };
-            console.log("🚀 ~ useMemo ~ userInfo:", userInfo)
-
+            
             handleCreateUser(userInfo);
 
             // save to session storage
@@ -149,8 +146,6 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
             handleCreateReferral(userProfileInformation.username, referralId);
         }
     }, [referralId, userProfileInformation]);
-
-
 
     const handleUpdateBoostRefillEndTime = useCallback(debounce(async (username: string, endTime: Date) => {
         console.log("DB ACTION TRIGGERED!");
