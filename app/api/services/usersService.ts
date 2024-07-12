@@ -25,27 +25,26 @@ export async function createUser(req: NextRequest) {
   // Check if user already exists
   const user = await prisma.users.findUnique({
     where: {
-      userId: request.userId,
+      userId: `${request.userId}`,
     },
   });
 
   // If user exists, return message
   if (user) {
-    // return fetchUsers({ ...req, url: `/api/users?userId=${request.userId}` } as NextRequest);
     return { user };
   }
 
   // If user does not exist, create a new user...
   const newUser = await prisma.users.create({
     data: {
-      userId: request.userId,
+      userId: `${request.userId}`,
       username: request.username,
       referralCode: `${request.username}${request.userId}`,
     },
   });
 
   // Return the response
-  return { user };
+  return { newUser };
 }
 
 export async function fetchUsers(req: NextRequest) {

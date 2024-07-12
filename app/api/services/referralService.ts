@@ -9,7 +9,7 @@ export async function fetchReferrals(req: NextRequest) {
   const searchParams = new URLSearchParams(req.url.split("?")[1]);
 
   // Get the userId from the search params
-  const userId = parseInt(searchParams.get("userId") as string);
+  const userId = searchParams.get("userId") as string;
 
   // if userid is not provided, return 400
   if (!userId) {

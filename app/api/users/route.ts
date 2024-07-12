@@ -44,10 +44,11 @@ export async function POST(req: NextRequest) {
 
     // Return the response
     return NextResponse.json(operation, { status: StatusCodes.Created });
-  } catch {
+  } catch(error) {
+    console.log("🚀 ~ POST ~ error:", error);
     // Return an error if the operation fails
     return NextResponse.json(
-      { error: ApplicationError.FailedToCreateUser.Text },
+      { error },
       { status: StatusCodes.InternalServerError }
     );
   }

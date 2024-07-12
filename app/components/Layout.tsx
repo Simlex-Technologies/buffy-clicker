@@ -35,6 +35,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     const [loaderIsVisible, setLoaderIsVisible] = useState(true);
     const [isReferralCreated, setIsReferralCreated] = useState(false);
     const [isBoostTimeRetrieved, setIsBoostTimeRetrieved] = useState(false);
+    let isCreatingUser = false;
 
     const iswindow = typeof window !== 'undefined' ? true : false;
 
@@ -44,6 +45,10 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     const referralId = params.get('referralId');
 
     async function handleCreateUser(userInfo: UserProfileInformation) {
+        if (isCreatingUser) return;
+
+        isCreatingUser = true;
+
         await createUser(userInfo)
             .then((response) => {
                 console.log(response);
@@ -110,17 +115,20 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
         if (!iswindow) return;
 
         if (userId && userName) {
+            console.log("🚀 ~ useMemo ~ userName:", userName)
+            console.log("🚀 ~ useMemo ~ userId:", userId)
 
             // construct user information
             const userInfo: UserProfileInformation = {
                 id: userId,
-                userId: Number(userId),
+                userId: userId,
                 dailyFreeBoosters: 4,
                 telegramTaskDone: false,
                 twitterTaskDone: false,
                 level: 1,
                 username: userName
             };
+            console.log("🚀 ~ useMemo ~ userInfo:", userInfo)
 
             handleCreateUser(userInfo);
 
@@ -206,7 +214,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     useEffect(() => {
         if (!isBoostTimeRetrieved || timesClickedPerSession === undefined) return;
 
-        if(timesClickedPerSession === 0) return;
+        if (timesClickedPerSession === 0) return;
 
         let endTime: Date | null = null;
         const currentTime = toUTCDate(new Date(Date.now() + 60 * 60 * 1000));

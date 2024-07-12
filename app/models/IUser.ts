@@ -1,6 +1,6 @@
 export type UserProfileInformation = {
   id: string;
-  userId: number;
+  userId: string;
   username: string;
   email?: string;
   emailVerified?: boolean;
