@@ -10,11 +10,6 @@ import { MultiLevelRequest } from "@/app/models/ILevel";
 import { levels } from "@/app/constants/levels";
 import { dailyBoostLimit } from "@/app/constants/user";
 
-export const revalidate = 0; //Very important
-
-export const dynamic = "force-dynamic";
-export const fetchCache = "force-no-store";
-
 export async function createUser(req: NextRequest) {
   // Get the body of the request
   const request = (await req.json()) as UserProfileInformation;

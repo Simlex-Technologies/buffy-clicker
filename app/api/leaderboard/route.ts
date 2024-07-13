@@ -5,6 +5,8 @@ import { customNextResponseError } from "../utils/customNextResponseError";
 import { StatusCodes } from "@/app/models/IStatusCodes";
 import { ApplicationError } from "@/app/constants/applicationError";
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
     // Call the request validation method
     await validateRequestMethod(req, "GET");
