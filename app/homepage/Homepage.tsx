@@ -123,7 +123,7 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
     // };
 
     return (
-        <main className="flex min-h-screen flex-col items-center py-20 pb-32">
+        <main className="flex min-h-screen flex-col items-center py-20 pb-32 select-none">
             {
                 userProfileInformation &&
                 <>
@@ -202,13 +202,13 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                         </div>
                     }
 
-                    {
+                    {/* {
                         userProfileInformation.referralCount ?
                             <div className="flex flex-row items-center text-white">
                                 <p className="text-slate-400">Referral points:</p>&nbsp;
                                 <span className="text-xl">{(userProfileInformation.referralCount * 1000).toLocaleString()}</span>
                             </div> : <></>
-                    }
+                    } */}
                 </>
             }
         </main>

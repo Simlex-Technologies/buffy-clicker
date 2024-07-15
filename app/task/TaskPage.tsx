@@ -347,8 +347,8 @@ const TaskPage: FunctionComponent<TaskPageProps> = (): ReactElement => {
                                                         <div className="flex flex-row gap-2 items-baseline">
                                                             <p className={`text-sm text-white/60`}>{metric.bonus.toLocaleString()} points</p>
                                                             {
-                                                                metric.tonBonus &&
-                                                                <p className={`text-sm text-white/60`}>+ {metric.tonBonus} TON</p>
+                                                                metric.tonBonus ?
+                                                                <p className={`text-sm text-white/60`}>+ {metric.tonBonus} TON</p> : <></>
                                                             }
                                                             {/* <TaskStatus status={userProfileInformation.referralTaskDone} /> */}
                                                         </div>
