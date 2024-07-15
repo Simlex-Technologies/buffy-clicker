@@ -45,7 +45,7 @@ const StatsPage: FunctionComponent<StatsPageProps> = (): ReactElement => {
 
 
     return (
-        <main className="flex min-h-screen flex-col items-center py-14">
+        <main className="flex min-h-screen flex-col items-center py-14 pb-24">
             <h2 className="text-white font-medium text-3xl">Leaderboard</h2>
 
             {
@@ -73,8 +73,11 @@ const StatsPage: FunctionComponent<StatsPageProps> = (): ReactElement => {
                                 leaderboard?.map((user, index) => (
                                     <tr key={index}>
                                         <td className="text-white p-2">{index + 1}</td>
-                                        <td className="text-white p-2 flex items-baseline gap-2">@{user.username} <span className="text-xs text-yellow-400 bg-yellow-300/20 py-[2px] px-1 rounded-md font-medium">{metrics(Number(user.points))?.status}</span></td>
-                                        <td className="text-white p-2 font-semibold">{user.points.toLocaleString()}</td>
+                                        <td className="text-white p-2 flex items-baseline gap-2">
+                                            <p className="max-w-[180px] overflow-ellipsis overflow-hidden whitespace-nowrap">@{user.username}</p>
+                                            {/* <span className="text-xs text-yellow-400 bg-yellow-300/20 py-[2px] px-1 rounded-md font-medium">{metrics(Number(user.points))?.status}</span> */}
+                                        </td>
+                                        <td className="text-white text-right p-2 font-semibold">{user.points.toLocaleString()}</td>
                                     </tr>
                                 ))
                             }

@@ -196,79 +196,106 @@ export class ApplicationError extends BaseApplicationError {
   /**
    * The error message for ~ Failed to create referral
    */
-    static FailedToCreateReferral: IApplicationError = {
-        Text: "Failed to create referral",
-        Code: "REFERRAL_1000",
-    };
+  static FailedToCreateReferral: IApplicationError = {
+    Text: "Failed to create referral",
+    Code: "REFERRAL_1000",
+  };
 
-    //#endregion
+  //#endregion
 
-    //#region Boosters Errors
+  //#region Boosters Errors
+
+  /**
+   * The error message for ~ No free boosters available
+   */
+  static NoFreeBoosters: IApplicationError = {
+    Text: "No free boosters available",
+    Code: "BOOSTERS_1000",
+  };
+
+  //#endregion
+
+  //#region Tasks Errors
+
+  /**
+   * The error message for ~ Telegram task already completed
+   */
+  static TelegramTaskAlreadyCompleted: IApplicationError = {
+    Text: "Telegram task already completed",
+    Code: "TASKS_1000",
+  };
+
+  /**
+   * The error message for ~ Twitter task already completed
+   */
+  static TwitterTaskAlreadyCompleted: IApplicationError = {
+    Text: "Twitter task already completed",
+    Code: "TASKS_1001",
+  };
+
+  //#endregion
+
+  //#region Level Errors
+
+  /**
+   * The error message for ~ Maximum level reached
+   */
+  static MaximumLevelReached: IApplicationError = {
+    Text: "Maximum level reached",
+    Code: "LEVEL_1000",
+  };
+
+  /**
+   * The error message for ~ Invalid level request
+   */
+  static InvalidLevelRequested: IApplicationError = {
+    Text: "Invalid level request",
+    Code: "LEVEL_1001",
+  };
+
+  /**
+   * The error message for ~ Not enough points to upgrade level
+   */
+  static NotEnoughPointsToUpgradeLevel: IApplicationError = {
+    Text: "Not enough points to upgrade level",
+    Code: "LEVEL_1002",
+  };
+
+  /**
+   * The error message for ~ Failed to update user level
+   */
+  static FailedToUpdateUserLevel: IApplicationError = {
+    Text: "Failed to update user level",
+    Code: "LEVEL_1003",
+  };
+
+  //#endregion
+
+  //#region Referal Errors
+
+  /**
+   * The error message for ~ Referral already claimed
+   */
+  static ReferralAlreadyClaimed: IApplicationError = {
+    Text: "Referral already claimed",
+    Code: "REFERRAL_1000",
+  };
+
+  /**
+   * The error message for ~ Insufficient referral count
+   */
+  static InsufficientReferralCount: IApplicationError = {
+    Text: "Insufficient referral count",
+    Code: "REFERRAL_1001",
+  };
 
     /**
-     * The error message for ~ No free boosters available
+     * The error message for ~ Invalid Referral Count
      */
-    static NoFreeBoosters: IApplicationError = {
-        Text: "No free boosters available",
-        Code: "BOOSTERS_1000",
-    };
+    static InvalidReferralCount: IApplicationError = {
+      Text: "Invalid Referral Count",
+      Code: "REFERRAL_1002",
+    }
 
-    //#endregion
-
-    //#region Tasks Errors
-
-    /**
-     * The error message for ~ Telegram task already completed
-     */
-    static TelegramTaskAlreadyCompleted: IApplicationError = {
-        Text: "Telegram task already completed",
-        Code: "TASKS_1000",
-    };
-
-    /**
-     * The error message for ~ Twitter task already completed
-     */
-    static TwitterTaskAlreadyCompleted: IApplicationError = {
-        Text: "Twitter task already completed",
-        Code: "TASKS_1001",
-    };
-
-    //#endregion
-
-    //#region Level Errors
-
-    /**
-     * The error message for ~ Maximum level reached
-     */
-    static MaximumLevelReached: IApplicationError = {
-        Text: "Maximum level reached",
-        Code: "LEVEL_1000",
-    };
-
-    /**
-     * The error message for ~ Invalid level request
-     */
-    static InvalidLevelRequested: IApplicationError = {
-        Text: "Invalid level request",
-        Code: "LEVEL_1001",
-    };
-
-    /**
-     * The error message for ~ Not enough points to upgrade level
-     */
-    static NotEnoughPointsToUpgradeLevel: IApplicationError = {
-        Text: "Not enough points to upgrade level",
-        Code: "LEVEL_1002",
-    };
-    
-    /**
-     * The error message for ~ Failed to update user level
-     */
-    static FailedToUpdateUserLevel: IApplicationError = {
-        Text: "Failed to update user level",
-        Code: "LEVEL_1003",
-    };
-
-    //#endregion
-    
+  //#endregion
 }

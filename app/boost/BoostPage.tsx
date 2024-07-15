@@ -41,7 +41,7 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
 
         if (!fetchOnly) setIsRequestingBoosts(true);
 
-        await updateDailyBoosts(userProfileInformation?.username as string, fetchOnly ? "fetch" : "update")
+        await updateDailyBoosts(userProfileInformation?.userId as string, fetchOnly ? "fetch" : "update")
             .then(async (response) => {
 
                 if (!fetchOnly) {
@@ -58,7 +58,7 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
                         const endTime = new Date(Date.now() - 3 * 60 * 60 * 1000);
                         console.log("🚀 ~ .then ~ endTime:", endTime)
 
-                        await updateBoostRefillEndTime({ username: userProfileInformation?.username as string, refillEndTime: endTime })
+                        await updateBoostRefillEndTime({ userId: userProfileInformation?.userId as string, refillEndTime: endTime })
                             .then((response) => {
                                 console.log("Boost refill time reset", response);
                                 updateTimesClickedPerSession(0);
@@ -130,7 +130,7 @@ const BoostPage: FunctionComponent<BoostPageProps> = (): ReactElement => {
             // construct the data
             const data: MultiLevelRequest = {
                 level: userLevel + 1,
-                username: userProfileInformation?.username as string,
+                userId: userProfileInformation?.userId as string,
             };
 
             setIsUpgradingLevel(true);

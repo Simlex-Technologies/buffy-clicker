@@ -7,5 +7,5 @@ export type Level = {
 
 export type MultiLevelRequest = {
     level: LevelEnum,
-    username: string,
+    userId: string,
 }

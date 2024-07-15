@@ -1,8 +1,8 @@
 import { FunctionComponent, ReactNode, createContext, useState } from "react";
 import { UserProfileInformation } from "../models/IUser";
 import { StorageKeys } from "../constants/storageKeys";
-import { fetchUsers } from "../api/services/usersService";
 import { fetchUserFromDb } from "../api/services/fetchUserFromDb";
+import { useFetchUserInformation } from "../api/apiClient";
 
 
 // Define the type for the context data
@@ -31,6 +31,7 @@ type AppProviderProps = {
 };
 
 const AppProvider: FunctionComponent<AppProviderProps> = ({ children }) => {
+    const fetchUserInformation = useFetchUserInformation();
 
     // Define state for customer data
     const [userProfileInformation, setUserProfileInformation] = useState<UserProfileInformation | null>(null);
@@ -61,6 +62,8 @@ const AppProvider: FunctionComponent<AppProviderProps> = ({ children }) => {
         if (_userInfo !== null || _userInfo !== undefined) {
 
             const user = await fetchUserFromDb(_userInfo.userId);
+            
+            console.log("🚀 ~ handleFetchUserInformation ~ user:", user)
 
             // Set the user information
             setUserProfileInformation(user);

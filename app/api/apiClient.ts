@@ -2,7 +2,7 @@ import axios from "axios";
 import { ApiRoutes } from "./apiRoutes";
 import { UserProfileInformation } from "../models/IUser";
 import { PointsUpdateRequest } from "../models/IPoints";
-import { ReferralCreationRequest } from "../models/IReferral";
+import { BonusClaimRequest, ReferralCreationRequest } from "../models/IReferral";
 import { MultiLevelRequest } from "../models/ILevel";
 
 export const API = axios.create({
@@ -59,16 +59,16 @@ export function useUpdateUserLevels() {
 }
 
 export function useUpdateBoostRefillEndTime() {
-    async function updateBoostRefillEndTime(data: { username: string, refillEndTime: Date }) {
-        return API.post(`${ApiRoutes.UsersBoostRefillEndTime}?username=${data.username}&refillEndTime=${data.refillEndTime}`);
+    async function updateBoostRefillEndTime(data: { userId: string, refillEndTime: Date }) {
+        return API.post(`${ApiRoutes.UsersBoostRefillEndTime}?userId=${data.userId}&refillEndTime=${data.refillEndTime}`);
     }
     
     return updateBoostRefillEndTime;   
 }
 
 export function useFetchUserBoostRefillEndTime() {
-    async function fetchUserBoostRefillEndTime(username: string) {
-        return API.get(`${ApiRoutes.UsersBoostRefillEndTime}?username=${username}`);
+    async function fetchUserBoostRefillEndTime(userId: string) {
+        return API.get(`${ApiRoutes.UsersBoostRefillEndTime}?userId=${userId}`);
     }
     
     return fetchUserBoostRefillEndTime;   
@@ -82,6 +82,15 @@ export function useCreateReferral() {
   return createReferral;
 }
 
+export function useClaimReferralBonus() {
+    async function claimReferralBonus(data: BonusClaimRequest) {
+        return API.post(ApiRoutes.ReferralBonus, data);
+    }
+    
+    return claimReferralBonus;
+    
+}
+
 export function useFetchLeaderboard() {
   async function fetchLeaderboard() {
     return API.get(ApiRoutes.Leaderboard);
@@ -91,8 +100,8 @@ export function useFetchLeaderboard() {
 }
 
 export function useUpdateDailyBoosts() {
-  async function updateDailyBoosts(username: string, mode: "fetch" | "update") {
-    return API.post(`${ApiRoutes.UsersDailyBoosts}/?username=${username}&mode=${mode}`);
+  async function updateDailyBoosts(userId: string, mode: "fetch" | "update") {
+    return API.post(`${ApiRoutes.UsersDailyBoosts}/?userId=${userId}&mode=${mode}`);
   }
 
   return updateDailyBoosts;

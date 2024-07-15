@@ -49,6 +49,11 @@ export class ApiRoutes {
   static Referrals: string = "api/referrals";
 
   /**
+   * The route to Referral bonus endpoint
+   */
+  static ReferralBonus: string = "api/referrals/bonus";
+
+  /**
    * The route to Leaderboard endpoint
    */
   static Leaderboard: string = "api/leaderboard";

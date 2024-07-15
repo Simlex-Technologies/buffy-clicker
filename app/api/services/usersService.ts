@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
-// import { v4 as uuidv4 } from "uuid";
 import { ApplicationError } from "@/app/constants/applicationError";
 import { StatusCodes } from "@/app/models/IStatusCodes";
 import { UserProfileInformation } from "@/app/models/IUser";
@@ -25,7 +24,7 @@ export async function createUser(req: NextRequest) {
   // Check if user already exists
   const user = await prisma.users.findUnique({
     where: {
-      userId: `${request.userId}`,
+      userId: request.userId,
     },
   });
 
@@ -54,9 +53,6 @@ export async function fetchUsers(req: NextRequest) {
   // Get the userId from the search params
   const userId = searchParams.get("userId");
 
-  // Get the userName from the search params
-  const userName = searchParams.get("userName");
-
   // If a userId is provided, find the user with that id
   if (userId) {
     const user = await prisma.users.findUnique({
@@ -78,31 +74,10 @@ export async function fetchUsers(req: NextRequest) {
     return { data: user };
   }
 
-  // If a userName is provided, find the user with that username
-  if (userName) {
-    const user = await prisma.users.findUnique({
-      where: {
-        username: userName,
-      },
-    });
-
-    // If user is not found, return 404
-    if (!user) {
-      return {
-        error: ApplicationError.UserWithUsernameNotFound.Text,
-        errorCode: ApplicationError.UserWithUsernameNotFound.Code,
-        statusCode: StatusCodes.NotFound,
-      };
-    }
-
-    // If user is found, return it
-    return { data: user };
-  }
-
   // Fetch all users
   const users = await prisma.users.findMany({
     orderBy: {
-      points: "asc",
+      points: "desc",
     },
   });
 
@@ -115,7 +90,7 @@ export async function updateUserPoints(req: NextRequest) {
   const request = (await req.json()) as PointsUpdateRequest;
 
   // Check if all required fields are provided
-  if (!request.username) {
+  if (!request.userId) {
     return {
       error: ApplicationError.MissingRequiredParameters.Text,
       statusCode: StatusCodes.BadRequest,
@@ -125,15 +100,15 @@ export async function updateUserPoints(req: NextRequest) {
   // Check if user exists
   const user = await prisma.users.findUnique({
     where: {
-      username: request.username,
+      userId: request.userId,
     },
   });
 
   // If user does not exists, return error
   if (!user) {
     return {
-      error: ApplicationError.UserWithUsernameNotFound.Text,
-      errorCode: ApplicationError.UserWithUsernameNotFound.Code,
+      error: ApplicationError.UserWithIdNotFound.Text,
+      errorCode: ApplicationError.UserWithIdNotFound.Code,
       statusCode: StatusCodes.NotFound,
     };
   }
@@ -156,12 +131,12 @@ export async function updateUserPoints(req: NextRequest) {
       // if we get here, it means the user has not done the task...
 
       // increment the user's points
-      await incrementUserPoints(request.points, request.username, user.points);
+      await incrementUserPoints(request.points, request.userId, user.points);
 
       // update the user's telegram task status
       await prisma.users.update({
         where: {
-          username: request.username,
+            userId: request.userId,
         },
         data: {
           telegramTaskDone: true,
@@ -183,12 +158,12 @@ export async function updateUserPoints(req: NextRequest) {
       // if we get here, it means the user has not done the task...
 
       // increment the user's points
-      await incrementUserPoints(request.points, request.username, user.points);
+      await incrementUserPoints(request.points, request.userId, user.points);
 
       // update the user's telegram task status
       await prisma.users.update({
         where: {
-          username: request.username,
+            userId: request.userId,
         },
         data: {
           twitterTaskDone: true,
@@ -203,7 +178,7 @@ export async function updateUserPoints(req: NextRequest) {
   // Update the user's points
   const updatedUser = await prisma.users.update({
     where: {
-      username: request.username,
+        userId: request.userId,
     },
     data: {
       points: request.points,
@@ -234,26 +209,6 @@ async function fetchUserByUserId(userId: string) {
   return { user };
 }
 
-export async function fetchUserByUsername(userName: string) {
-  const user = await prisma.users.findUnique({
-    where: {
-      username: userName,
-    },
-  });
-
-  // If user is not found, return 404
-  if (!user) {
-    return {
-      error: ApplicationError.UserWithUsernameNotFound.Text,
-      errorCode: ApplicationError.UserWithUsernameNotFound.Code,
-      statusCode: StatusCodes.NotFound,
-    };
-  }
-
-  // If user is found, return it
-  return { user };
-}
-
 export async function fetchLeaderboard(req: NextRequest) {
   // Fetch all users
   const users = await prisma.users.findMany({
@@ -268,15 +223,15 @@ export async function fetchLeaderboard(req: NextRequest) {
 }
 
 export async function updateFreeDailyBoosters(req: NextRequest) {
-  // Use search params to get the username
+  // Use search params to get the userId
   const searchParams = new URLSearchParams(req.url.split("?")[1]);
 
-  const username = searchParams.get("username");
+  const userId = searchParams.get("userId");
 
   const mode = searchParams.get("mode");
 
   // Check if all required fields are provided
-  if (!username) {
+  if (!userId) {
     return {
       error: ApplicationError.MissingRequiredParameters.Text,
       statusCode: StatusCodes.BadRequest,
@@ -286,15 +241,15 @@ export async function updateFreeDailyBoosters(req: NextRequest) {
   // Check if user exists
   const user = await prisma.users.findUnique({
     where: {
-      username: username,
+        userId: userId,
     },
   });
 
   // If user exists, return error
   if (!user) {
     return {
-      error: ApplicationError.UserWithUsernameNotFound.Text,
-      errorCode: ApplicationError.UserWithUsernameNotFound.Code,
+      error: ApplicationError.UserWithIdNotFound.Text,
+      errorCode: ApplicationError.UserWithIdNotFound.Code,
       statusCode: StatusCodes.NotFound,
     };
   }
@@ -307,7 +262,7 @@ export async function updateFreeDailyBoosters(req: NextRequest) {
     ) {
       const updatedUser = await prisma.users.update({
         where: {
-          username: username,
+            userId: userId,
         },
         data: {
           dailyFreeBoosters: dailyBoostLimit,
@@ -346,7 +301,7 @@ export async function updateFreeDailyBoosters(req: NextRequest) {
   // Update the user's free daily boosters and expiration date
   const updatedUser = await prisma.users.update({
     where: {
-      username: username,
+        userId: userId,
     },
     data: {
       dailyFreeBoosters: {
@@ -368,15 +323,15 @@ export async function updateFreeDailyBoosters(req: NextRequest) {
 }
 
 export async function updateBoostRefillEndTime(req: NextRequest) {
-  // Use search params to get the username
+  // Use search params to get the userId
   const searchParams = new URLSearchParams(req.url.split("?")[1]);
 
-  const username = searchParams.get("username");
+  const userId = searchParams.get("userId");
 
   const refillEndTime = searchParams.get("refillEndTime");
 
   // Check if all required fields are provided
-  if (!username || !refillEndTime) {
+  if (!userId || !refillEndTime) {
     return {
       error: ApplicationError.MissingRequiredParameters.Text,
       statusCode: StatusCodes.BadRequest,
@@ -386,15 +341,15 @@ export async function updateBoostRefillEndTime(req: NextRequest) {
   // Check if user exists
   const user = await prisma.users.findUnique({
     where: {
-      username: username,
+        userId: userId,
     },
   });
 
   // If user exists, return error
   if (!user) {
     return {
-      error: ApplicationError.UserWithUsernameNotFound.Text,
-      errorCode: ApplicationError.UserWithUsernameNotFound.Code,
+      error: ApplicationError.UserWithIdNotFound.Text,
+      errorCode: ApplicationError.UserWithIdNotFound.Code,
       statusCode: StatusCodes.NotFound,
     };
   }
@@ -402,7 +357,7 @@ export async function updateBoostRefillEndTime(req: NextRequest) {
   // Update the user's boost refill time
   const updatedUser = await prisma.users.update({
     where: {
-      username: username,
+        userId: userId,
     },
     data: {
       boostRefillEndTime: new Date(refillEndTime),
@@ -417,13 +372,13 @@ export async function updateBoostRefillEndTime(req: NextRequest) {
 }
 
 export async function fetchBoostRefillEndTime(req: NextRequest) {
-  // Use search params to get the username
+  // Use search params to get the userId
   const searchParams = new URLSearchParams(req.url.split("?")[1]);
 
-  const username = searchParams.get("username");
+  const userId = searchParams.get("userId");
 
   // Check if all required fields are provided
-  if (!username) {
+  if (!userId) {
     return {
       error: ApplicationError.MissingRequiredParameters.Text,
       statusCode: StatusCodes.BadRequest,
@@ -433,15 +388,15 @@ export async function fetchBoostRefillEndTime(req: NextRequest) {
   // Check if user exists
   const user = await prisma.users.findUnique({
     where: {
-      username: username,
+        userId: userId,
     },
   });
 
   // If user exists, return error
   if (!user) {
     return {
-      error: ApplicationError.UserWithUsernameNotFound.Text,
-      errorCode: ApplicationError.UserWithUsernameNotFound.Code,
+      error: ApplicationError.UserWithIdNotFound.Text,
+      errorCode: ApplicationError.UserWithIdNotFound.Code,
       statusCode: StatusCodes.NotFound,
     };
   }
@@ -455,12 +410,12 @@ export async function fetchBoostRefillEndTime(req: NextRequest) {
 
 async function incrementUserPoints(
   points: number,
-  username: string,
+  userId: string,
   currentPoints: number
 ) {
   await prisma.users.update({
     where: {
-      username: username,
+        userId: userId,
     },
     data: {
       points: currentPoints + points,
@@ -473,7 +428,7 @@ export async function updateUserLevel(req: NextRequest) {
   const request = (await req.json()) as MultiLevelRequest;
 
   // Check if all required fields are provided
-  if (!request.username) {
+  if (!request.userId) {
     return {
       error: ApplicationError.MissingRequiredParameters.Text,
       statusCode: StatusCodes.BadRequest,
@@ -483,15 +438,15 @@ export async function updateUserLevel(req: NextRequest) {
   // Check if user exists
   const user = await prisma.users.findUnique({
     where: {
-      username: request.username,
+        userId: request.userId,
     },
   });
 
   // If user does not exists, return error
   if (!user) {
     return {
-      error: ApplicationError.UserWithUsernameNotFound.Text,
-      errorCode: ApplicationError.UserWithUsernameNotFound.Code,
+      error: ApplicationError.UserWithIdNotFound.Text,
+      errorCode: ApplicationError.UserWithIdNotFound.Code,
       statusCode: StatusCodes.NotFound,
     };
   }
@@ -541,7 +496,7 @@ export async function updateUserLevel(req: NextRequest) {
   // Update the user's level and deduct the level fee from the user's points
   const updatedUser = await prisma.users.update({
     where: {
-      username: request.username,
+        userId: request.userId,
     },
     data: {
       level: request.level,

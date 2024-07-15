@@ -8,27 +8,27 @@ export const metrics = (taps: number) => {
         };
     } else if (taps >= 1000 && taps < 10000) {
         return {
-            pointSuffix: "K",
+            pointSuffix: "",
             status: "Beginner",
         };
     } else if (taps >= 10000 && taps < 100000) {
         return {
-            pointSuffix: "K",
+            pointSuffix: "",
             status: "Intermediate",
         };
     } else if (taps >= 100000 && taps < 1000000) {
         return {
-            pointSuffix: "K",
+            pointSuffix: "",
             status: "Pro",
         };
     } else if (taps >= 1000000 && taps < 10000000) {
         return {
-            pointSuffix: "M",
+            pointSuffix: "",
             status: "Master",
         };
     } else if (taps >= 10000000) {
         return {
-            pointSuffix: "M",
+            pointSuffix: "",
             status: "Legend",
         };
     }

@@ -7,5 +7,17 @@ export interface ReferralCreationRequest {
   /**
    * The username of the user who was referred
    */
-  username: string;
+  userId: string;
+}
+
+export interface BonusClaimRequest {
+    /**
+     * The user ID of the user claiming the bonus
+     */
+    userId: string;
+    
+    /**
+     * The number of referrals to be claimed for
+     */
+    referralCount: number;
 }

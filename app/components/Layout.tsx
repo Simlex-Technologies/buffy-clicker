@@ -7,7 +7,7 @@ import Topbar from "./Topbar";
 import BottomBar from "./BottomBar";
 import NextTopLoader from "nextjs-toploader";
 import { ApplicationContext, ApplicationContextData } from "../context/ApplicationContext";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { UserProfileInformation } from "../models/IUser";
 import { StorageKeys } from "../constants/storageKeys";
 import { splashScreenVariant } from "../animations/splashScreen";
@@ -32,6 +32,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
         nextUpdateTimestamp, updateTimeLeft: setTimeLeft, updateTimesClickedPerSession,
     } = useContext(ApplicationContext) as ApplicationContextData;
 
+    const router = useRouter();
     const [loaderIsVisible, setLoaderIsVisible] = useState(true);
     const [isReferralCreated, setIsReferralCreated] = useState(false);
     const [isBoostTimeRetrieved, setIsBoostTimeRetrieved] = useState(false);
@@ -51,6 +52,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
         await createUser(userInfo)
             .then((response) => {
+                fetchUserProfileInformation();
                 console.log(response);
             })
             .catch((error) => {
@@ -58,10 +60,10 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
             });
     };
 
-    async function handleCreateReferral(username: string, referrerId: string) {
+    async function handleCreateReferral(userId: string, referrerId: string) {
 
         const data: ReferralCreationRequest = {
-            username,
+            userId: userId,
             referrerId
         };
 
@@ -110,11 +112,22 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
         return () => clearInterval(interval);
     }, [nextUpdateTimestamp]);
 
+    function generate8RandomCharacters() {
+        // generate 8 random characters involving letters and numbers
+        let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < 8; i++) {
+            let randomIndex = Math.floor(Math.random() * characters.length);
+            result += characters[randomIndex];
+        }
+        return result;
+    }
+
     // hook to create user profile
     useMemo(() => {
         if (!iswindow) return;
 
-        if (userId && userName) {
+        if (userId) {
 
             // construct user information
             const userInfo: UserProfileInformation = {
@@ -124,13 +137,15 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
                 telegramTaskDone: false,
                 twitterTaskDone: false,
                 level: 1,
-                username: userName
-            };
-            
+                username: userName == 'None' || !userName ? generate8RandomCharacters() : userName
+            }; 
+
             handleCreateUser(userInfo);
 
             // save to session storage
             sessionStorage.setItem(StorageKeys.UserInformation, JSON.stringify(userInfo));
+
+            router.refresh();
         }
 
         const userProfileInformation = sessionStorage.getItem(StorageKeys.UserInformation);
@@ -143,13 +158,13 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     // hook to create referral if referralId & user info is available, and referral is not created yet
     useMemo(() => {
         if (referralId && userProfileInformation && !isReferralCreated) {
-            handleCreateReferral(userProfileInformation.username, referralId);
+            handleCreateReferral(userProfileInformation.userId, referralId);
         }
     }, [referralId, userProfileInformation]);
 
-    const handleUpdateBoostRefillEndTime = useCallback(debounce(async (username: string, endTime: Date) => {
+    const handleUpdateBoostRefillEndTime = useCallback(debounce(async (userId: string, endTime: Date) => {
         console.log("DB ACTION TRIGGERED!");
-        await updateBoostRefillEndTime({ username, refillEndTime: endTime })
+        await updateBoostRefillEndTime({ userId, refillEndTime: endTime })
             .then((response) => {
                 console.log("Boost refill time updated", response);
             })
@@ -163,8 +178,8 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
         return new Date(date.toISOString());
     };
 
-    async function handleFetchUserBoostRefillEndTime(username: string) {
-        await fetchUserBoostRefillEndTime(username)
+    async function handleFetchUserBoostRefillEndTime(userId: string) {
+        await fetchUserBoostRefillEndTime(userId)
             .then((response) => {
                 setIsBoostTimeRetrieved(true);
                 updateUserProfileInformation(response?.data.data);
@@ -201,7 +216,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
     useEffect(() => {
         if (userProfileInformation && !isBoostTimeRetrieved) {
             console.log("TIME TO RETRIEVE")
-            handleFetchUserBoostRefillEndTime(userProfileInformation.username);
+            handleFetchUserBoostRefillEndTime(userProfileInformation.userId);
         }
     }, [userProfileInformation, isBoostTimeRetrieved]);
 
@@ -229,7 +244,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
 
         let timer: NodeJS.Timeout;
 
-        handleUpdateBoostRefillEndTime(userProfileInformation?.username as string, endTime as Date);
+        handleUpdateBoostRefillEndTime(userProfileInformation?.userId as string, endTime as Date);
 
         if (timesClickedPerSession > 0) {
             timer = setTimeout(async () => {
@@ -251,7 +266,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
             initial="opened"
             animate={loaderIsVisible ? "opened" : "closed"}
         >
-            <NextTopLoader
+            {/* <NextTopLoader
                 color="#ffffff"
                 initialPosition={0.08}
                 crawlSpeed={200}
@@ -261,7 +276,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }): ReactElement => {
                 easing="ease"
                 speed={200}
                 shadow="0 0 10px #f1fa9e,0 0 5px #ceb0fa"
-            />
+            /> */}
 
             {!loaderIsVisible && (
                 <>

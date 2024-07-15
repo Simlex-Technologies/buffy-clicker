@@ -18,6 +18,7 @@ export type UserProfileInformation = {
   boostRefillEndTime?: Date;
   telegramTaskDone: boolean;
   twitterTaskDone: boolean;
+  highestReferralBonusClaimed?: number;
   createdAt?: Date;
   updatedAt?: Date;
 };

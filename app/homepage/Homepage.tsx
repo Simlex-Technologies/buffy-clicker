@@ -6,7 +6,7 @@ import CustomImage from "../components/ui/image";
 import { Icons } from "../components/ui/icons";
 import { metrics } from "../constants/userMetrics";
 import { ApplicationContext, ApplicationContextData } from "../context/ApplicationContext";
-import { useFetchUserBoostRefillEndTime, useUpdateBoostRefillEndTime, useUpdateUserPoints } from "../api/apiClient";
+import { useUpdateUserPoints } from "../api/apiClient";
 import { PointsUpdateRequest } from "../models/IPoints";
 import { Metrics } from "../enums/IMetrics";
 import { sessionLimit } from "../constants/user";
@@ -18,8 +18,6 @@ interface HomepageProps {
 const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
 
     const updateUserPoints = useUpdateUserPoints();
-    const updateBoostRefillEndTime = useUpdateBoostRefillEndTime();
-    const fetchUserBoostRefillEndTime = useFetchUserBoostRefillEndTime();
 
     const {
         userProfileInformation, fetchUserProfileInformation, updateUserProfileInformation,
@@ -33,12 +31,12 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
 
         // construct the data 
         const data: PointsUpdateRequest = {
-            username: userProfileInformation?.username as string,
+            userId: userProfileInformation?.userId as string,
             points: taps
         };
 
         await updateUserPoints(data)
-            .then((response) => {
+            .then(() => {
                 // console.log(response);
                 fetchUserProfileInformation();
             })
@@ -107,7 +105,13 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
             return "text-white/60";
         }
     };
-    
+    const [isClicked, setIsClicked] = useState(false);
+    // useMemo(() => {
+    //     if (isClicked) {
+    //         setIsClicked(false);
+    //     } 
+    // }, [isClicked])
+
     // async function _handleUpdateBoostRefillEndTime(endTime: Date) {
     //     await updateBoostRefillEndTime({ username: userProfileInformation?.username as string, refillEndTime: endTime })
     //         .then((response) => {
@@ -119,7 +123,7 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
     // };
 
     return (
-        <main className="flex min-h-screen flex-col items-center py-20">
+        <main className="flex min-h-screen flex-col items-center py-20 pb-32">
             {
                 userProfileInformation &&
                 <>
@@ -148,25 +152,26 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                     </div>
 
                     <div className="flex relative mb-12">
-                        {/* <div className="absolute w-full h-full border-2 border-white">
+                        <div className="absolute w-full h-full flex items-center justify-end z-20 pointer-events-none">
                             <AnimatePresence>
                                 {
-                                taps > 0 && 
-                                ([...Array(taps)]).map((click) => (
-                                    <motion.div
-                                        key={click}
-                                        initial={{ opacity: 1, y: 0 }}
-                                        animate={{ opacity: 0, y: -50 }}
-                                        exit={{ opacity: 0 }}
-                                        transition={{ duration: 1 }}
-                                        className="click-animation"
-                                    >
-                                        +1
-                                    </motion.div>
-                                ))
+                                    isClicked &&
+                                    ([...Array(10)]).map((click, index) => (
+                                        <motion.div
+                                            key={`${Date.now()}${index}`}
+                                            initial={{ opacity: 1, y: 0 }}
+                                            animate={{ opacity: 0, y: -200 }}
+                                            exit={{ opacity: 0, y: -200 }}
+                                            transition={{ duration: 1 }}
+                                            // style={{ left: click.x, top: click.y }}
+                                            className="absolute z-20 text-lg text-white pr-6"
+                                        >
+                                            +{userProfileInformation.level}
+                                        </motion.div>
+                                    ))
                                 }
                             </AnimatePresence>
-                        </div> */}
+                        </div>
                         <motion.span
                             onClick={() => {
                                 if (timesClickedPerSession === undefined) return;
@@ -176,6 +181,8 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                                 setTaps(taps + (1 * userProfileInformation.level));
 
                                 updateTimesClickedPerSession(timesClickedPerSession + 1);
+
+                                setIsClicked(!isClicked);
                             }}
                             whileTap={{
                                 // scale: 1.1,
@@ -183,7 +190,7 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                                 transition: { duration: 0.1 }
                             }}
                             className="w-60 h-60 relative">
-                            <CustomImage src={images.clicker} alt="Durov" />
+                            <CustomImage priority src={images.clicker} alt="Durov" />
                         </motion.span>
                     </div>
 
@@ -196,11 +203,11 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                     }
 
                     {
-                        userProfileInformation.referralCount &&
-                        <div className="flex flex-row items-center text-white">
-                            <p className="text-slate-400">Referral points:</p>&nbsp;
-                            <span className="text-xl">{userProfileInformation.referralCount * 1000}</span>
-                        </div>
+                        userProfileInformation.referralCount ?
+                            <div className="flex flex-row items-center text-white">
+                                <p className="text-slate-400">Referral points:</p>&nbsp;
+                                <span className="text-xl">{(userProfileInformation.referralCount * 1000).toLocaleString()}</span>
+                            </div> : <></>
                     }
                 </>
             }
