@@ -65,31 +65,6 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
         };
     }, [taps]);
 
-    // // const DEBOUNCE_DELAY_FOR_SESSION = 32400; // Delay for 3 clicks for 3hrs
-    // const DEBOUNCE_DELAY_FOR_SESSION = 10800; // Delay for 1 click for 3hrs
-
-    // // Use a hook to update the timesClickedPerSession back to zero after the user has stopped clicking. Decrement the timesclickedpersession by 3 till the limit is reached
-    // useEffect(() => {
-
-    //     if (sessionLimit - timesClickedPerSession >= sessionLimit || timesClickedPerSession <= 0) {
-    //         // reset the state
-    //         setTimesClickedPerSession(0);
-    //         return;
-    //     };
-
-    //     const timer = setTimeout(() => {
-    //         // Decrement the timesClickedPerSession by 3
-    //         setTimesClickedPerSession(timesClickedPerSession - 1);
-    //     }, DEBOUNCE_DELAY_FOR_SESSION);
-
-    //     // save the timesClickedPerSession to the session storage
-    //     sessionStorage.setItem(StorageKeys.TimesClickedPerSession, timesClickedPerSession.toString());
-
-    //     return () => {
-    //         clearTimeout(timer);
-    //     };
-    // }, [timesClickedPerSession]);
-
     function swapColorBasedOnStatus() {
         if (metrics(taps)?.status === Metrics.NOOB) {
             return "text-green-500/60";
@@ -106,11 +81,6 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
         }
     };
     const [isClicked, setIsClicked] = useState(false);
-    // useMemo(() => {
-    //     if (isClicked) {
-    //         setIsClicked(false);
-    //     } 
-    // }, [isClicked])
 
     // async function _handleUpdateBoostRefillEndTime(endTime: Date) {
     //     await updateBoostRefillEndTime({ username: userProfileInformation?.username as string, refillEndTime: endTime })
@@ -173,10 +143,14 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                             </AnimatePresence>
                         </div>
                         <motion.span
-                            onClick={() => {
+                            // onTouchStart={() => { 
+                            //     console.log("Touch start");
+                            // }}
+                            onTouchStart={() => {
+                                console.log("Click start");
                                 if (timesClickedPerSession === undefined) return;
 
-                                if (sessionLimit - timesClickedPerSession <= 0) return;
+                                if ((sessionLimit * userProfileInformation.level) - timesClickedPerSession <= 0) return;
 
                                 setTaps(taps + (1 * userProfileInformation.level));
 
@@ -198,7 +172,7 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                         timesClickedPerSession !== undefined &&
                         <div className="flex flex-row items-center text-white mb-5">
                             <p className="text-slate-400">Energy level:</p>&nbsp;
-                            <span className="text-base">{sessionLimit - timesClickedPerSession}/{sessionLimit}</span>
+                            <span className="text-base">{(sessionLimit * userProfileInformation.level) - timesClickedPerSession}/{(sessionLimit * userProfileInformation.level)}</span>
                         </div>
                     }
 
