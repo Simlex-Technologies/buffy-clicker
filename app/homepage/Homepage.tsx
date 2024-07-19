@@ -178,15 +178,15 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                                     setClicks([...clicks, { id: Date.now(), x: touch.pageX, y: touch.pageY }]);
                                     
                                     card.style.transform = `perspective(1000px) rotateX(${-y / 10}deg) rotateY(${x / 10}deg)`;
+
+                                    setTaps(taps + (1 * userProfileInformation.level));
+    
+                                    updateTimesClickedPerSession(timesClickedPerSession + 1);
                                 });
                                     
                                 setTimeout(() => {
                                     card.style.transform = '';
                                 }, 100);
-
-                                setTaps(taps + (1 * userProfileInformation.level));
-
-                                updateTimesClickedPerSession(timesClickedPerSession + 1);
 
                                 // setIsClicked(!isClicked);
                             }}
