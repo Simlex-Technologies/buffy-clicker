@@ -163,16 +163,23 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                         </div>
 
                         <motion.span
-                            onClick={(e) => {
+                            onTouchStart={(e) => {
                                 if (timesClickedPerSession === undefined) return;
 
                                 if ((sessionLimit * userProfileInformation.level) - timesClickedPerSession <= 0) return;
 
                                 const card = e.currentTarget;
                                 const rect = card.getBoundingClientRect();
-                                const x = e.clientX - rect.left - rect.width / 2;
-                                const y = e.clientY - rect.top - rect.height / 2;
-                                card.style.transform = `perspective(1000px) rotateX(${-y / 10}deg) rotateY(${x / 10}deg)`;
+                                // Iterate through each touch point
+                                Array.from(e.touches).forEach((touch, index) => {
+                                    const x = touch.clientX - rect.left - rect.width / 2;
+                                    const y = touch.clientY - rect.top - rect.height / 2;
+
+                                    setClicks([...clicks, { id: Date.now(), x: touch.pageX, y: touch.pageY }]);
+                                    
+                                    card.style.transform = `perspective(1000px) rotateX(${-y / 10}deg) rotateY(${x / 10}deg)`;
+                                });
+                                    
                                 setTimeout(() => {
                                     card.style.transform = '';
                                 }, 100);
@@ -180,8 +187,6 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                                 setTaps(taps + (1 * userProfileInformation.level));
 
                                 updateTimesClickedPerSession(timesClickedPerSession + 1);
-
-                                setClicks([...clicks, { id: Date.now(), x: e.pageX, y: e.pageY }]);
 
                                 // setIsClicked(!isClicked);
                             }}
