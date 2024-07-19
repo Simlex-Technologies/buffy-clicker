@@ -81,6 +81,11 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
         }
     };
     const [isClicked, setIsClicked] = useState(false);
+    const [clicks, setClicks] = useState<{ id: number, x: number, y: number }[]>([]);
+
+    const handleAnimationEnd = (id: number) => {
+        setClicks((prevClicks) => prevClicks.filter(click => click.id !== id));
+    };
 
     // async function _handleUpdateBoostRefillEndTime(endTime: Date) {
     //     await updateBoostRefillEndTime({ username: userProfileInformation?.username as string, refillEndTime: endTime })
@@ -121,9 +126,23 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                         </div>
                     </div>
 
+                    {clicks.map((click) => (
+                        <div
+                            key={click.id}
+                            className="absolute text-4xl z-20 font-bold opacity-0 text-white pointer-events-none"
+                            style={{
+                                top: `${click.y - 42}px`,
+                                left: `${click.x - 28}px`,
+                                animation: `float 1s ease-out`
+                            }}
+                            onAnimationEnd={() => handleAnimationEnd(click.id)}
+                        >
+                            +{userProfileInformation.level}
+                        </div>
+                    ))}
                     <div className="flex relative mb-12">
                         <div className="absolute w-full h-full flex items-center justify-end z-20 pointer-events-none">
-                            <AnimatePresence>
+                            {/* <AnimatePresence>
                                 {
                                     isClicked &&
                                     ([...Array(10)]).map((click, index) => (
@@ -140,23 +159,31 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
                                         </motion.div>
                                     ))
                                 }
-                            </AnimatePresence>
+                            </AnimatePresence> */}
                         </div>
+
                         <motion.span
-                            // onTouchStart={() => { 
-                            //     console.log("Touch start");
-                            // }}
-                            onTouchStart={() => {
-                                console.log("Click start");
+                            onClick={(e) => {
                                 if (timesClickedPerSession === undefined) return;
 
                                 if ((sessionLimit * userProfileInformation.level) - timesClickedPerSession <= 0) return;
+
+                                const card = e.currentTarget;
+                                const rect = card.getBoundingClientRect();
+                                const x = e.clientX - rect.left - rect.width / 2;
+                                const y = e.clientY - rect.top - rect.height / 2;
+                                card.style.transform = `perspective(1000px) rotateX(${-y / 10}deg) rotateY(${x / 10}deg)`;
+                                setTimeout(() => {
+                                    card.style.transform = '';
+                                }, 100);
 
                                 setTaps(taps + (1 * userProfileInformation.level));
 
                                 updateTimesClickedPerSession(timesClickedPerSession + 1);
 
-                                setIsClicked(!isClicked);
+                                setClicks([...clicks, { id: Date.now(), x: e.pageX, y: e.pageY }]);
+
+                                // setIsClicked(!isClicked);
                             }}
                             whileTap={{
                                 // scale: 1.1,
