@@ -164,6 +164,8 @@ const Homepage: FunctionComponent<HomepageProps> = (): ReactElement => {
 
                         <motion.span
                             onClick={(e) => {
+                                e.preventDefault();
+                                
                                 if (timesClickedPerSession === undefined) return;
 
                                 if ((sessionLimit * userProfileInformation.level) - timesClickedPerSession <= 0) return;
